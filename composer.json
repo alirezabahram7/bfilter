@@ -2,6 +2,7 @@
     "name": "behamin/bfiltrers",
     "description": "A package for customized filtering on elequent modeles",
     "type": "library",
+    "license": "MIT",
     "authors": [
         {
             "name": "Alireza Bahram",
