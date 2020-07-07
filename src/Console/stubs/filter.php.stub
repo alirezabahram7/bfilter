@@ -1,0 +1,10 @@
+<?php
+
+namespace {{ namespace }};
+
+use Behamin\Bfilters\Filter;
+
+class {{ class }} extends Filter
+{
+    public $properties = ['x','y'];
+}

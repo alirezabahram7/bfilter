@@ -1,0 +1,25 @@
+{
+    "name": "behamin/bfiltrers",
+    "description": "A package for customized filtering on elequent modeles",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Alireza Bahram",
+            "email": "alib327@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Behamin\\Bfilters\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Behamin\\Bfilters\\BfilterServiceProvider"
+            ]
+        }
+    },
+    "require": {}
+}
