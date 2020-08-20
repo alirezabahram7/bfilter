@@ -1,18 +1,15 @@
 <?php
-
-
-namespace Behamin\Bfilters;
-
+namespace BFilters;
 
 use Illuminate\Support\ServiceProvider;
 
-class BfilterServiceProvider extends ServiceProvider
+class BFilterServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-               \Behamin\Bfilters\Console\Filter::class
+               '\BFilters\Console\Filter'
             ]);
         }
     }

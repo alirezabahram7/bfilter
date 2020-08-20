@@ -1,10 +1,8 @@
 <?php
+namespace BFilters\Traits;
 
 
-namespace Behamin\Bfilters\Traits;
-
-
-trait bfilters
+trait HasFilter
 {
     public function scopeFilter($query, $filters)
     {

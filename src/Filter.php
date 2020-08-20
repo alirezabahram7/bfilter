@@ -5,17 +5,17 @@
  * Date: 6/26/2019
  * Time: 5:28 PM
  */
+namespace BFilters;
 
-namespace Behamin\Bfilters;
-
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class Filter
 {
-    protected $request, $builder;
+    protected $request;
+    protected $builder;
     protected $filters = [];
-    protected $relation = '';
-    protected $additional_properties = [];
+    protected $relations = [];
     protected $sumField = null;
 
     /**
@@ -31,7 +31,7 @@ class Filter
      * @param $builder
      * @return array
      */
-    public function apply($builder)
+    public function apply($builder): array
     {
         $this->builder = $builder;
         $entries = $builder;
@@ -42,8 +42,10 @@ class Filter
             $sum = $entries->sum($this->sumField);
         }
 
-        if (isset($this->request->all()['filter'])) {
-            list($sortData, $offset, $limit, $filters) = $this->getFilters($this->request);
+        if ($this->hasFilter()) {
+            [$sortData, $offset, $limit, $filters] = $this->getFilters(
+                $this->request
+            );
 
             if ($filters) {
                 $entries = $this->applyFilters($filters, $this->builder);
@@ -58,6 +60,7 @@ class Filter
             if($this->sumField){
                 $sum = $entries->sum($this->sumField);
             }
+
             if ($limit) {
                 $entries = $entries->offset($offset)->limit($limit);
             }
@@ -66,102 +69,193 @@ class Filter
     }
 
     /**
-     * @param Request $request
-     * @return array
+     * @param array $filterList
+     * @param  Builder  $entries
+     *
+     * @return Builder
      */
-    protected function getFilters(Request $request): array
+    protected function applyFilters($filterList, $entries): Builder
     {
-        $requestData = json_decode($request->all()['filter']);
-
-        $sortData = isset($requestData->sort) ? $requestData->sort : null;
-
-        $pageLimit = isset($requestData->page) ? $requestData->page : null;
-        $offset = isset($pageLimit->offset) ? $pageLimit->offset : null;
-        $limit = isset($pageLimit->limit) ? $pageLimit->limit : null;
-
-        $filters = isset($requestData->filters) ? $requestData->filters : null;
-
-        return array($sortData, $offset, $limit, $filters);
-    }
-
-    /**
-     * @param $filters
-     * @param $entries
-     * @param $relation
-     * @return mixed
-     */
-    protected function applyFilters($filters, $entries)
-    {
-        foreach ($filters as $filter) {
-            $entries = $entries->where(
-                function ($query) use ($filter) {
-                    foreach ($filter as $i => $item) {
-                        $field = $item->field;
-                        $value = $item->value;
-                        $op = $item->op;
-                        if ($op == 'like') {
-                            $value = '%' . $value . '%';
-                        }
-                        if (in_array($field, $this->additional_properties)) {
-                            $key =  array_search($field,$this->additional_properties);
-                            $query = $this->filterRelation($query, $field, $op, $value, $i,$key);
-                        } else {
-                            if ($i == 0) {
-                                $query = $query->where($field, $op, $value);
-                            } else {
-                                $query = $query->orWhere($field, $op, $value);
-                            }
-                        }
-                    }
-                }
-            );
+        foreach ($filterList as $filters) {
+            $entries = $this->applyFilter($filters, $entries);
         }
 
         return $entries;
     }
 
     /**
-     * @param $sortData
+     * @param $filters
      * @param $entries
+     *
+     * @return Builder
+     */
+    protected function applyFilter($filters, $entries): Builder
+    {
+        return $entries->where(
+            function ($query) use ($filters) {
+                foreach ($filters as $filterKey => $item) {
+                    $item = $this->prepareFilter($item);
+                    if (! $this->applyRelations($query, $item, $filterKey === 0)){
+                        if ($filterKey === 0) {
+                            $this->where($query, $item);
+                        } else {
+                            $this->OrWhere($query, $item);
+                        }
+                    }
+                }
+            }
+        );
+    }
+
+    /**
+     * @param $query
+     * @param $item
+     *
+     * @return Builder
+     */
+    protected function where($query, $item): Builder
+    {
+        return $query->where($item->field, $item->op, $item->value);
+    }
+
+    protected function orWhere($query, $item){
+        return $query->orWhere($item->field, $item->op, $item->value);
+    }
+
+    /**
+     * @param  object  $filter
+     *
+     * @return object $filter
+     */
+    private function prepareFilter(object $filter){
+        if ($filter->op == 'like') {
+            $filter->value = '%'.$filter->value.'%';
+        }
+        return $filter;
+    }
+
+    private function hasRelation(): bool
+    {
+        return ! empty($this->relations);
+    }
+
+    /**
+     * relations = [
+     *  'relation_name' => [
+     *      'destination_key' => 'origin_key'
+     *   ]
+     * ]
+     *
+     * @param $query
+     * @param $item
+     * @param  bool  $isWhere
+     *
      * @return mixed
      */
-    protected function sort($sortData, $entries)
+    protected function applyRelations(& $query, $item, $isWhere = true){
+        if (! $this->hasRelation()) {
+            return false;
+        }
+        foreach ($this->relations as $relationName => $params) {
+            if (($relationKey = $this->hasRelationField($params, $item)) !== false) {
+                $item = $this->setRelationKey($item, $relationKey);
+                $query = $this->filterRelation($query, $item, $relationName, $isWhere);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param $relationProperties
+     * @param $filter
+     *
+     * @return false|int|string
+     */
+    private function hasRelationField($relationProperties, $filter){
+        return array_search($filter->field, $relationProperties, true);
+    }
+
+    /**
+     * @param $item 'filterObject'
+     * @param $keyName
+     *
+     * @return object $filter
+     */
+    private function setRelationKey($item, $keyName){
+        if (! empty($keyName)){
+            $item->field = $keyName;
+        }
+        return $item;
+    }
+
+
+
+    /**
+     * @param $sortData
+     * @param $entries
+     * @return Builder
+     */
+    protected function sort($sortData, $entries): Builder
     {
         foreach ($sortData as $sortDatum) {
             $field = $sortDatum->field;
             $dir = $sortDatum->dir;
-
             $entries = $entries->orderBy($field, $dir);
         }
         return $entries;
     }
 
     /**
+     * @param $entries
+     * @param $filter
      * @param $relation
-     * @param $field
-     * @param $value
-     * @param $index
-     * @return mixed
+     * @param $isWhere
+     *
+     * @return Builder
      */
-    public function filterRelation($entries, $field, $op, $value, $index,$key)
+    public function filterRelation($entries, $filter, $relation, $isWhere): Builder
     {
-        $field = is_numeric($key) ? $field : $key;
-        $relation = $this->relation;
-        if ($index > 0) {
+        if (! $isWhere) {
             return $entries->orWhereHas(
                 $relation,
-                function ($query) use ($field, $op, $value) {
-                    $query->where($field, $op, $value);
+                function ($query) use ($filter) {
+                    $this->where($query, $filter);
                 }
             );
         }
         return $entries->whereHas(
             $relation,
-            function ($query) use ($field, $op, $value) {
-                $query->where($field, $op, $value);
+            function ($query) use ($filter) {
+                $this->where($query, $filter);
             }
         );
     }
 
 
+
+    /**
+     * @return bool
+     */
+    protected function hasFilter(): bool
+    {
+        return ! empty($this->request->get('filter', null));
+    }
+
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    protected function getFilters(Request $request): array
+    {
+        $requestData = \json_decode($request->get('filter', (object)[]));
+
+        $sortData = data_get($requestData, 'sort', null);
+        $offset   = data_get($requestData, 'offset', null);
+        $limit    = data_get($requestData, 'limit', null);
+        $filters  = data_get($requestData, 'filters', null);
+
+        return array($sortData, $offset, $limit, $filters);
+    }
 }
