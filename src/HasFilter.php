@@ -1,5 +1,5 @@
 <?php
-namespace BFilters;
+namespace BFilters/Traits;
 
 
 trait HasFilter
