@@ -1,8 +1,5 @@
 <?php
-
-
-namespace Behamin\Bfilters\Console;
-
+namespace BFilters\Console;
 
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,12 +10,12 @@ class Filter extends GeneratorCommand
 
     protected function getStub()
     {
-        return __DIR__ . '\stubs\filter.php.stub';
+        return __DIR__ . '/stubs/filter.php.stub';
     }
 
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace . '\Filters';
+        return $rootNamespace . '\Http\Filters';
     }
 
     protected function getArguments()
