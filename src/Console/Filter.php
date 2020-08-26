@@ -15,7 +15,7 @@ class Filter extends GeneratorCommand
 
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace . '\Filters';
+        return $rootNamespace . '\Http\Filters';
     }
 
     protected function getArguments()

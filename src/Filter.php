@@ -173,7 +173,10 @@ class Filter
      * @return false|int|string
      */
     private function hasRelationField($relationProperties, $filter){
-        return array_search($filter->field, $relationProperties, true);
+        if (!empty($relationProperties)) {
+            return array_search($filter->field, $relationProperties, true);
+        }
+        return false;
     }
 
     /**

@@ -2,6 +2,7 @@
 namespace {{ namespace }};
 
 use BFilters\Filter;
+use Illuminate\Http\Request;
 
 class {{ class }} extends Filter
 {
