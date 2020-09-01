@@ -1,0 +1,31 @@
+{
+    "name": "behamin/bfilters",
+    "description": "A package for customized filtering on eloquent models",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alireza Bahram",
+            "email": "alib327@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "BFilters\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "BFilters\\BFilterServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "php" : "^7.0",
+        "laravel/framework": "^7.24",
+        "ext-json": "*",
+        "symfony/console" : "^5.0"
+    },
+    "minimum-stability": "stable"
+}
