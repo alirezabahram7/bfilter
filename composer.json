@@ -26,5 +26,6 @@
         "laravel/framework": "^7.24",
         "ext-json": "*",
         "symfony/console" : "^5.0"
-    }
+    },
+    "minimum-stability": "stable"
 }

@@ -74,7 +74,7 @@ class Filter
      *
      * @return Builder
      */
-    protected function applyFilters($filterList, $entries): Builder
+    protected function applyFilters(array $filterList,Builder $entries): Builder
     {
         foreach ($filterList as $filters) {
             $entries = $this->applyFilter($filters, $entries);
@@ -173,10 +173,16 @@ class Filter
      * @return false|int|string
      */
     private function hasRelationField($relationProperties, $filter){
-        if (!empty($relationProperties)) {
-            return array_search($filter->field, $relationProperties, true);
+        if (empty($relationProperties)) {
+            return false;
         }
-        return false;
+
+        if (! is_array($relationProperties)){
+            $relationProperties = [$relationProperties];
+        }
+
+        return $relationProperties[$filter->field] ??
+            array_search($filter->field, $relationProperties, true);
     }
 
     /**
