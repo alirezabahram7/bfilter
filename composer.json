@@ -23,7 +23,7 @@
     },
     "require": {
         "php" : "^7.0",
-        "laravel/framework": "^7.24",
+        "laravel/framework": "^7.24|^8.0",
         "ext-json": "*",
         "symfony/console" : "^5.0"
     },
