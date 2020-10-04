@@ -1,4 +1,5 @@
 <?php
+
 namespace BFilters;
 
 use Illuminate\Support\ServiceProvider;
@@ -9,7 +10,7 @@ class BFilterServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-               '\BFilters\Console\Filter'
+                '\BFilters\Console\Filter'
             ]);
         }
     }

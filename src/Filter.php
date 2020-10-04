@@ -1,10 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Alireza
- * Date: 6/26/2019
- * Time: 5:28 PM
- */
+
 namespace BFilters;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -36,9 +31,9 @@ class Filter
         $this->builder = $builder;
         $entries = $builder;
         $count = $entries->count();
-        $sum = 0 ;
+        $sum = 0;
 
-        if($this->sumField){
+        if ($this->sumField) {
             $sum = $entries->sum($this->sumField);
         }
 
@@ -57,7 +52,7 @@ class Filter
 
             $count = $entries->count();
 
-            if($this->sumField){
+            if ($this->sumField) {
                 $sum = $entries->sum($this->sumField);
             }
 
@@ -65,7 +60,7 @@ class Filter
                 $entries = $entries->offset($offset)->limit($limit);
             }
         }
-        return array($entries,$count,$sum);
+        return array($entries, $count, $sum);
     }
 
     /**
@@ -74,7 +69,7 @@ class Filter
      *
      * @return Builder
      */
-    protected function applyFilters(array $filterList,Builder $entries): Builder
+    protected function applyFilters(array $filterList, Builder $entries): Builder
     {
         foreach ($filterList as $filters) {
             $entries = $this->applyFilter($filters, $entries);
@@ -95,7 +90,7 @@ class Filter
             function ($query) use ($filters) {
                 foreach ($filters as $filterKey => $item) {
                     $item = $this->prepareFilter($item);
-                    if (! $this->applyRelations($query, $item, $filterKey === 0)){
+                    if (!$this->applyRelations($query, $item, $filterKey === 0)) {
                         if ($filterKey === 0) {
                             $this->where($query, $item);
                         } else {
@@ -118,7 +113,8 @@ class Filter
         return $query->where($item->field, $item->op, $item->value);
     }
 
-    protected function orWhere($query, $item){
+    protected function orWhere($query, $item)
+    {
         return $query->orWhere($item->field, $item->op, $item->value);
     }
 
@@ -127,16 +123,17 @@ class Filter
      *
      * @return object $filter
      */
-    private function prepareFilter(object $filter){
+    private function prepareFilter(object $filter)
+    {
         if ($filter->op == 'like') {
-            $filter->value = '%'.$filter->value.'%';
+            $filter->value = '%' . $filter->value . '%';
         }
         return $filter;
     }
 
     private function hasRelation(): bool
     {
-        return ! empty($this->relations);
+        return !empty($this->relations);
     }
 
     /**
@@ -152,8 +149,9 @@ class Filter
      *
      * @return mixed
      */
-    protected function applyRelations(& $query, $item, $isWhere = true){
-        if (! $this->hasRelation()) {
+    protected function applyRelations(&$query, $item, $isWhere = true)
+    {
+        if (!$this->hasRelation()) {
             return false;
         }
         foreach ($this->relations as $relationName => $params) {
@@ -172,12 +170,13 @@ class Filter
      *
      * @return false|int|string
      */
-    private function hasRelationField($relationProperties, $filter){
+    private function hasRelationField($relationProperties, $filter)
+    {
         if (empty($relationProperties)) {
             return false;
         }
 
-        if (! is_array($relationProperties)){
+        if (!is_array($relationProperties)) {
             $relationProperties = [$relationProperties];
         }
 
@@ -191,8 +190,9 @@ class Filter
      *
      * @return object $filter
      */
-    private function setRelationKey($item, $keyName){
-        if (! empty($keyName)){
+    private function setRelationKey($item, $keyName)
+    {
+        if (!empty($keyName)) {
             $item->field = $keyName;
         }
         return $item;
@@ -225,7 +225,7 @@ class Filter
      */
     public function filterRelation($entries, $filter, $relation, $isWhere): Builder
     {
-        if (! $isWhere) {
+        if (!$isWhere) {
             return $entries->orWhereHas(
                 $relation,
                 function ($query) use ($filter) {
@@ -248,7 +248,7 @@ class Filter
      */
     protected function hasFilter(): bool
     {
-        return ! empty($this->request->get('filter', null));
+        return !empty($this->request->get('filter', null));
     }
 
 
