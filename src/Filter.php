@@ -261,8 +261,8 @@ class Filter
         $requestData = \json_decode($request->get('filter', (object)[]));
 
         $sortData = data_get($requestData, 'sort', null);
-        $offset   = data_get($requestData, 'page.offset', null);
-        $limit    = data_get($requestData, 'page.limit', null);
+        $offset   = data_get($requestData, 'page.offset', 0);
+        $limit    = data_get($requestData, 'page.limit', 15);
         $filters  = data_get($requestData, 'filters', null);
 
         return array($sortData, $offset, $limit, $filters);
