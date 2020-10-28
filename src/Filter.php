@@ -38,7 +38,7 @@ class Filter
         }
 
         if ($this->hasFilter()) {
-            [$sortData, $offset, $limit, $filters] = $this->getFilters(
+            list($sortData, $offset, $limit, $filters) = $this->getFilters(
                 $this->request
             );
 
@@ -258,7 +258,7 @@ class Filter
      */
     protected function getFilters(Request $request): array
     {
-        $requestData = \json_decode($request->get('filter', (object)[]));
+        $requestData = \json_decode($request->get('filter', (object)[]), false, 512, JSON_THROW_ON_ERROR);
 
         $sortData = data_get($requestData, 'sort', null);
         $offset   = data_get($requestData, 'page.offset', null);
