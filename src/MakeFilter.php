@@ -1,13 +1,16 @@
 <?php
 
 
-namespace BFilters\Traits;
+namespace BFilters;
 
-trait MakeFilter
+use Illuminate\Contracts\Support;
+
+class MakeFilter implements \Jsonable
 {
-    private $filters = [];
-    private $sort = [];
-    private $page = [];
+    protected $filters = [];
+    protected $sortData = [];
+    protected $offset = 0;
+    protected $limit = null;
 
     /**
      * @param array $filters
@@ -28,30 +31,36 @@ trait MakeFilter
      */
     public function orderBy($field, $dir)
     {
-        return $this->setSort(
+        return $this->addOrder(
             [
                 'field' => $field,
-                'dir'   => $dir
+                'dir' => $dir
             ]
         );
+    }
+
+    public function addOrder($sortData)
+    {
+        $this->sortData[] = $sortData;
+        return $this;
     }
 
     /**
      * @return array
      */
-    public function getSort(): array
+    public function getSortData(): array
     {
-        return $this->sort;
+        return $this->sortData;
     }
 
     /**
-     * @param  array  $sort
+     * @param array $sortData
      *
      * @return MakeFilter
      */
-    public function setSort(array $sort)
+    public function setSortData(array $sortData)
     {
-        $this->sort = $sort;
+        $this->sortData = $sortData;
         return $this;
     }
 
@@ -60,17 +69,26 @@ trait MakeFilter
      */
     public function getPage(): array
     {
-        return $this->page;
+        return [
+            'limit' => $this->limit,
+            'offset' => $this->offset
+        ];
     }
 
     /**
-     * @param  array  $page
+     * @param array $page
      *
      * @return MakeFilter
      */
     public function setPage(array $page)
     {
-        $this->page = $page;
+        if (!empty($page['limit'])) {
+            $this->limit = $page['limit'];
+        }
+
+        if (!empty($page['offset'])) {
+            $this->offset = $page['offset'];
+        }
         return $this;
     }
 
@@ -83,7 +101,7 @@ trait MakeFilter
     }
 
     /**
-     * @param  array  $filters
+     * @param array $filters
      *
      * @return MakeFilter
      */
@@ -96,24 +114,23 @@ trait MakeFilter
     /**
      * Encode a value as JSON.
      *
-     * @param  int  $opt
-     *
+     * @param int $options
      * @return string
      * @throws \JsonException
      */
-    public function encode($opt = 0): string
+    public function toJson($options = 0)
     {
-        $opt |= JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+        $options |= JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
 
         return \json_encode(
             [
                 'filter' => [
                     'filters' => $this->filters,
-                    'page'    => $this->page,
-                    'sort'    => $this->sort
+                    'page' => $this->page,
+                    'sort' => $this->sortData
                 ],
             ],
-            JSON_THROW_ON_ERROR | $opt
+            JSON_THROW_ON_ERROR | $options
         );
     }
 }

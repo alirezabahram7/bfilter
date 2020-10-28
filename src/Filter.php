@@ -5,21 +5,22 @@ namespace BFilters;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
-class Filter
+class Filter extends MakeFilter
 {
     protected $request;
     protected $builder;
-    protected $filters = [];
     protected $relations = [];
     protected $sumField = null;
 
     /**
      * PostFilter constructor.
      * @param Request $request
+     * @throws \JsonException
      */
     public function __construct(Request $request)
     {
         $this->request = $request;
+        $this->getFilters();
     }
 
     /**
@@ -38,40 +39,38 @@ class Filter
         }
 
         if ($this->hasFilter()) {
-            list($sortData, $offset, $limit, $filters) = $this->getFilters(
-                $this->request
-            );
-
-            if ($filters) {
-                $entries = $this->applyFilters($filters, $this->builder);
-            }
-
-            if ($sortData) {
-                $entries = $this->sort($sortData, $entries);
-            }
-
-            $count = $entries->count();
-
-            if ($this->sumField) {
-                $sum = $entries->sum($this->sumField);
-            }
-
-            if ($limit) {
-                $entries = $entries->offset($offset)->limit($limit);
-            }
+            $entries = $this->applyFilters($this->builder);
         }
+
+        if ($this->hasSort()) {
+            $entries = $this->sort($entries);
+        }
+
+        $count = $entries->count();
+
+        if ($this->sumField) {
+            $sum = $entries->sum($this->sumField);
+        }
+
+        if (! empty($this->limit)){
+            $entries = $entries->limit($this->limit);
+        }
+
+        if (! empty($this->offset)) {
+            $entries = $entries->offset($this->offset);
+        }
+
         return array($entries, $count, $sum);
     }
 
     /**
-     * @param array $filterList
-     * @param  Builder  $entries
+     * @param Builder $entries
      *
      * @return Builder
      */
-    protected function applyFilters(array $filterList, Builder $entries): Builder
+    protected function applyFilters(Builder $entries): Builder
     {
-        foreach ($filterList as $filters) {
+        foreach ($$this->filters as $filters) {
             $entries = $this->applyFilter($filters, $entries);
         }
 
@@ -119,7 +118,7 @@ class Filter
     }
 
     /**
-     * @param  object  $filter
+     * @param object $filter
      *
      * @return object $filter
      */
@@ -145,7 +144,7 @@ class Filter
      *
      * @param $query
      * @param $item
-     * @param  bool  $isWhere
+     * @param bool $isWhere
      *
      * @return mixed
      */
@@ -199,15 +198,14 @@ class Filter
     }
 
 
-
     /**
      * @param $sortData
      * @param $entries
      * @return Builder
      */
-    protected function sort($sortData, $entries): Builder
+    protected function sort($entries): Builder
     {
-        foreach ($sortData as $sortDatum) {
+        foreach ($this->sortData as $sortDatum) {
             $field = $sortDatum->field;
             $dir = $sortDatum->dir;
             $entries = $entries->orderBy($field, $dir);
@@ -242,29 +240,38 @@ class Filter
     }
 
 
-
     /**
      * @return bool
      */
     protected function hasFilter(): bool
     {
-        return !empty($this->request->get('filter', null));
+        return !empty($this->filters);
+    }
+
+    /**
+     * @return bool
+     */
+    protected function hasSort(){
+        return !empty($this->sortData);
     }
 
 
     /**
-     * @param Request $request
      * @return array
+     * @throws \JsonException
      */
-    protected function getFilters(Request $request): array
+    public function getFilters(): array
     {
-        $requestData = \json_decode($request->get('filter', (object)[]), false, 512, JSON_THROW_ON_ERROR);
+        $requestData = \json_decode(
+            $this->request->get('filter', (object)[]),
+            false,
+            512,
+            JSON_THROW_ON_ERROR
+        );
 
-        $sortData = data_get($requestData, 'sort', null);
-        $offset   = data_get($requestData, 'page.offset', null);
-        $limit    = data_get($requestData, 'page.limit', null);
-        $filters  = data_get($requestData, 'filters', null);
-
-        return array($sortData, $offset, $limit, $filters);
+        $this->sortData = data_get($requestData, 'sort', null);
+        $this->offset = data_get($requestData, 'page.offset', null);
+        $this->limit = data_get($requestData, 'page.limit', null);
+        $this->filters = data_get($requestData, 'filters', null);
     }
 }

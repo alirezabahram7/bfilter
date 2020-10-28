@@ -3,12 +3,10 @@
 namespace {{ namespace }};
 
 use BFilters\Filter;
-use BFilters\Traits\MakeFilter;
 use Illuminate\Http\Request;
 
 class {{ class }} extends Filter
 {
-    use MakeFilter;
     public function __construct(Request $request)
     {
         parent::__construct($request);
