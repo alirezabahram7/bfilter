@@ -4,6 +4,7 @@ namespace BFilters;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class Filter extends MakeFilter
 {
@@ -14,17 +15,20 @@ class Filter extends MakeFilter
 
     /**
      * PostFilter constructor.
-     * @param Request $request
+     *
+     * @param  Request  $request
+     *
      * @throws \JsonException
      */
     public function __construct(Request $request)
     {
         $this->request = $request;
-        $this->getFilters();
+        $this->getParamFilters();
     }
 
     /**
      * @param $builder
+     *
      * @return array
      */
     public function apply($builder): array
@@ -52,25 +56,25 @@ class Filter extends MakeFilter
             $sum = $entries->sum($this->sumField);
         }
 
-        if (! empty($this->limit)){
+        if (! empty($this->limit)) {
             $entries = $entries->limit($this->limit);
-        }
 
-        if (! empty($this->offset)) {
-            $entries = $entries->offset($this->offset);
+            if ( $this->offset !== null ) {
+                $entries = $entries->offset($this->offset);
+            }
         }
 
         return array($entries, $count, $sum);
     }
 
     /**
-     * @param Builder $entries
+     * @param  Builder  $entries
      *
      * @return Builder
      */
     protected function applyFilters(Builder $entries): Builder
     {
-        foreach ($$this->filters as $filters) {
+        foreach ($this->filters as $filters) {
             $entries = $this->applyFilter($filters, $entries);
         }
 
@@ -89,7 +93,12 @@ class Filter extends MakeFilter
             function ($query) use ($filters) {
                 foreach ($filters as $filterKey => $item) {
                     $item = $this->prepareFilter($item);
-                    if (!$this->applyRelations($query, $item, $filterKey === 0)) {
+                    if (!$this->applyRelations(
+                        $query,
+                        $item,
+                        $filterKey === 0
+                    )
+                    ) {
                         if ($filterKey === 0) {
                             $this->where($query, $item);
                         } else {
@@ -109,23 +118,64 @@ class Filter extends MakeFilter
      */
     protected function where($query, $item): Builder
     {
+        if ($this->isWhereNull($item)) {
+            return $this->whereNull($query, $item->field, 'and');
+        }
+
         return $query->where($item->field, $item->op, $item->value);
     }
 
+    /**
+     * @param $query
+     * @param $item
+     *
+     * @return mixed
+     */
     protected function orWhere($query, $item)
     {
+        if ($this->isWhereNull($item)) {
+            return $this->whereNull($query, $item->field, 'or');
+        }
+
         return $query->orWhere($item->field, $item->op, $item->value);
     }
 
     /**
-     * @param object $filter
+     * @param $item
+     *
+     * @return bool
+     */
+    protected function isWhereNull($item): bool
+    {
+        return ($item->op === 'is' and $item->value === null);
+    }
+
+    /**
+     * @param $query
+     * @param $columns
+     * @param  string  $boolean
+     * @param  false  $not
+     *
+     * @return mixed
+     */
+    public function whereNull($query, $columns, $boolean = 'and', $not = false)
+    {
+        return $query->whereNull($columns, $boolean, $not);
+    }
+
+    /**
+     * @param  object  $filter
      *
      * @return object $filter
      */
     private function prepareFilter(object $filter)
     {
-        if ($filter->op == 'like') {
-            $filter->value = '%' . $filter->value . '%';
+        if ($filter->op === 'like') {
+            $filter->value = '%'.$filter->value.'%';
+        }
+
+        if ($filter->op === 'is') {
+            $filter->op = '=';
         }
         return $filter;
     }
@@ -144,7 +194,7 @@ class Filter extends MakeFilter
      *
      * @param $query
      * @param $item
-     * @param bool $isWhere
+     * @param  bool  $isWhere
      *
      * @return mixed
      */
@@ -154,9 +204,16 @@ class Filter extends MakeFilter
             return false;
         }
         foreach ($this->relations as $relationName => $params) {
-            if (($relationKey = $this->hasRelationField($params, $item)) !== false) {
+            if (($relationKey = $this->hasRelationField($params, $item))
+                !== false
+            ) {
                 $item = $this->setRelationKey($item, $relationKey);
-                $query = $this->filterRelation($query, $item, $relationName, $isWhere);
+                $query = $this->filterRelation(
+                    $query,
+                    $item,
+                    $relationName,
+                    $isWhere
+                );
                 return true;
             }
         }
@@ -184,7 +241,7 @@ class Filter extends MakeFilter
     }
 
     /**
-     * @param $item 'filterObject'
+     * @param $item  'filterObject'
      * @param $keyName
      *
      * @return object $filter
@@ -199,8 +256,8 @@ class Filter extends MakeFilter
 
 
     /**
-     * @param $sortData
      * @param $entries
+     *
      * @return Builder
      */
     protected function sort($entries): Builder
@@ -221,8 +278,12 @@ class Filter extends MakeFilter
      *
      * @return Builder
      */
-    public function filterRelation($entries, $filter, $relation, $isWhere): Builder
-    {
+    public function filterRelation(
+        $entries,
+        $filter,
+        $relation,
+        $isWhere
+    ): Builder {
         if (!$isWhere) {
             return $entries->orWhereHas(
                 $relation,
@@ -251,27 +312,38 @@ class Filter extends MakeFilter
     /**
      * @return bool
      */
-    protected function hasSort(){
+    protected function hasSort(): bool
+    {
         return !empty($this->sortData);
     }
 
 
     /**
-     * @return array
      * @throws \JsonException
      */
-    public function getFilters(): array
+    public function getParamFilters(): void
     {
+
         $requestData = \json_decode(
-            $this->request->get('filter', (object)[]),
-            false,
+            $this->request->get('filter', '[]'),
+            true,
             512,
             JSON_THROW_ON_ERROR
         );
 
-        $this->sortData = data_get($requestData, 'sort', null);
-        $this->offset = data_get($requestData, 'page.offset', null);
-        $this->limit = data_get($requestData, 'page.limit', null);
-        $this->filters = data_get($requestData, 'filters', null);
+        $sortData =  Arr::get($requestData, 'sort', []);
+        if (! empty($sortData)) {
+            $this->setSortData($sortData);
+        }
+
+        $page = Arr::get($requestData, 'page', []);
+        if (! empty($page)) {
+            $this->setPage($page);
+        }
+
+        $filters = Arr::get($requestData, 'filters', []);
+        if (! empty($filters)) {
+            $this->setFilters($filters);
+        }
     }
 }
