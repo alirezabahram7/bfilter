@@ -115,10 +115,33 @@ class Filter
      */
     protected function where($query, $item): Builder
     {
+        if ($this->isWhereNull($item)) {
+            return $this->whereNull($query, $item->field, 'and');
+        }
+
+        if(!isset($item->field) or $item->field == null){
+            return $query->fullSearch($item->value);
+        }
+
         return $query->where($item->field, $item->op, $item->value);
     }
 
-    protected function orWhere($query, $item){
+    /**
+     * @param $query
+     * @param $item
+     *
+     * @return mixed
+     */
+    protected function orWhere($query, $item)
+    {
+        if ($this->isWhereNull($item)) {
+            return $this->whereNull($query, $item->field, 'or');
+        }
+
+        if(!isset($item->field) or $item->field == null){
+            return $query->fullSearch($item->value,true);
+        }
+
         return $query->orWhere($item->field, $item->op, $item->value);
     }
 
