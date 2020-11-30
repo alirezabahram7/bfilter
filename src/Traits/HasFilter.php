@@ -1,4 +1,5 @@
 <?php
+
 namespace BFilters\Traits;
 
 
@@ -27,7 +28,7 @@ trait HasFilter
             foreach ($columns as $c => $column) {
                 if ( ! $beginsWithOr and $c == 0) {
                     $query->where($column, 'like', '%' . $term . '%');
-                }else{
+                } else {
                     $query->orWhere($column, 'like', '%' . $term . '%');
                 }
             }
