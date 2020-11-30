@@ -16,7 +16,7 @@ class MyModel extends Eloquent
 {
     use HasFilter;
     
-    // define entries for full text serach, or define fillable entries for that
+    // define fields for full text serach as "searchable" or "fillable"
     protected searchable = [ 'first_name','last_name' ] 
 }`
 
@@ -86,7 +86,7 @@ In Request
                     [
                         {"field": "mobile", "op": "like", "value": "9891"}
                     ],
-                    [//full search : search a value in fields you set in its model "searchable" or "fillable" arrays
+                    [//full search : search a string in fields you set in its model "searchable" or "fillable" arrays
                         {"value" : "al"}
                     ]
          ]
