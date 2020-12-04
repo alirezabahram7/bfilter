@@ -122,6 +122,10 @@ class Filter extends MakeFilter
             return $this->whereNull($query, $item->field, 'and');
         }
 
+        if ($this->isWhereIn($item)) {
+            return $this->whereIn($query, $item);
+        }
+
         return $query->where($item->field, $item->op, $item->value);
     }
 
@@ -137,7 +141,21 @@ class Filter extends MakeFilter
             return $this->whereNull($query, $item->field, 'or');
         }
 
+        if ($this->isWhereIn($item)) {
+            return $this->whereIn($query, $item);
+        }
+
         return $query->orWhere($item->field, $item->op, $item->value);
+    }
+
+    /**
+     * @param $item
+     *
+     * @return bool
+     */
+    protected function isWhereIn($item): bool
+    {
+        return ($item->op === 'in' and is_array($item->value));
     }
 
     /**
@@ -148,6 +166,17 @@ class Filter extends MakeFilter
     protected function isWhereNull($item): bool
     {
         return ($item->op === 'is' and $item->value === null);
+    }
+
+    /**
+     * @param $query
+     * @param $item
+     *
+     * @return mixed
+     */
+    public function whereIn($query, $item)
+    {
+        return $query->whereIn($item->field, $item->value);
     }
 
     /**

@@ -25,6 +25,11 @@ class MakeFilter implements Jsonable
         return $this;
     }
 
+    public function addMagicFilter(array $filter){
+        $filter = ['field' => key($filter), 'value' => value($filter), 'op' => '='];
+        return $this->addFilter([$filter]);
+    }
+
     /**
      * @param $filters
      *
