@@ -61,8 +61,6 @@ class UserFilter extends Filter
 }
 ```
 
-
-```
 ### Usage
 In controllers 
 ```
@@ -71,6 +69,7 @@ public function index(YourModelFilter $filters): Response
     [$entries, $count, $sum] = YourModel::filter($filters);
 }
 ```
+
 In Request
 ```
 filter:{
