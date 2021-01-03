@@ -126,6 +126,10 @@ class Filter extends MakeFilter
             return $this->whereIn($query, $item);
         }
 
+        if(!isset($item->field) or $item->field === null){
+            return $query->fullSearch($item->value);
+        }
+
         return $query->where($item->field, $item->op, $item->value);
     }
 
@@ -143,6 +147,10 @@ class Filter extends MakeFilter
 
         if ($this->isWhereIn($item)) {
             return $this->whereIn($query, $item);
+        }
+
+        if(!isset($item->field) or $item->field == null){
+            return $query->fullSearch($item->value,true);
         }
 
         return $query->orWhere($item->field, $item->op, $item->value);
