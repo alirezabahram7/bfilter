@@ -25,6 +25,11 @@ class MakeFilter implements Jsonable
         return $this;
     }
 
+    public function addMagicFilter(array $filter){
+        $filter = ['field' => key($filter), 'value' => value($filter), 'op' => '='];
+        return $this->addFilter([$filter]);
+    }
+
     /**
      * @param $filters
      *
@@ -32,12 +37,15 @@ class MakeFilter implements Jsonable
      */
     public function prepareAddFilter($filters)
     {
+        $keys = ['field', 'op', 'value'];
         $constFilters = $filters;
         foreach ($filters as &$filter) {
-            $filter = Arr::only((array)$filter, ['field', 'op', 'value']);
+            $filter = Arr::only((array)$filter, $keys);
             if (count($filter) !== 3) {
                 throw new \RuntimeException(
-                    'filter is wrong.'."\n".print_r($constFilters, true)
+                    'filter is wrong.' . "\n"
+                    . 'filter muse have these keys: ' . join(', ', $keys) .
+                    ".\n\r while " . print_r($constFilters, true)
                 );
             }
             $filter = (object)$filter;
@@ -193,14 +201,20 @@ class MakeFilter implements Jsonable
     public function toJson($options = 0)
     {
         $options |= JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+        $data = [];
 
-        return json_encode(
-            [
-                'filters' => $this->filters,
-                'page'    => $this->getPage(),
-                'sort'    => $this->sortData
-            ],
-            JSON_THROW_ON_ERROR | $options
+        if (!empty($this->filters)) {
+            $data['filters'] = $this->filters;
+        }
+        if (!empty($page = $this->getPage())) {
+            $data['page'] = $page;
+        }
+
+        if (!empty($this->sortData)) {
+            $data['sort'] = $this->sortData;
+        }
+
+        return json_encode($data, JSON_THROW_ON_ERROR | $options
         );
     }
 
