@@ -15,4 +15,11 @@ class BFilterServiceProvider extends ServiceProvider
             ]);
         }
     }
+
+    public function register()
+    {
+        $this->app->bind('MakeFilter', function (){
+            return new MakeFilter();
+        });
+    }
 }
