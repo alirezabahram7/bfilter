@@ -341,7 +341,7 @@ class Filter extends MakeFilter
     /**
      * @return bool
      */
-    protected function hasFilter(): bool
+    public function hasFilter(): bool
     {
         return !empty($this->filters);
     }
@@ -349,7 +349,7 @@ class Filter extends MakeFilter
     /**
      * @return bool
      */
-    protected function hasSort(): bool
+    public function hasSort(): bool
     {
         return !empty($this->sortData);
     }
