@@ -207,7 +207,7 @@ class Filter extends MakeFilter
      */
     private function prepareFilter(object $filter)
     {
-        if ($filter->op === 'like') {
+        if ($filter->op === 'like' or $filter->op === 'not like') {
             $filter->value = '%'.$filter->value.'%';
         }
 
