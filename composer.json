@@ -7,6 +7,14 @@
         {
             "name": "Alireza Bahram",
             "email": "alib327@gmail.com"
+        },
+        {
+            "name": "Hossein Ebrahimzadeh",
+            "email": "abi.hossein@gmail.com"
+        },
+        {
+            "name": "Omid Alizadeh",
+            "email": "om.alizadeh1@gmail.com"
         }
     ],
     "autoload": {
@@ -22,10 +30,10 @@
         }
     },
     "require": {
-        "php" : "^7.0",
-        "laravel/framework": "^7.24",
+        "php": "^7.2|^7.3|^7.4",
+        "laravel/framework": "^7.0|^8.0",
         "ext-json": "*",
-        "symfony/console" : "^5.0"
+        "symfony/console": "^5.0"
     },
     "minimum-stability": "stable"
 }
