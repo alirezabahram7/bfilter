@@ -2,7 +2,6 @@
 
 namespace BFilters\Traits;
 
-
 trait HasFilter
 {
     /**
