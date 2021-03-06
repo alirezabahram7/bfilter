@@ -12,6 +12,7 @@ class Filter extends MakeFilter
     protected $builder;
     protected $relations = [];
     protected $sumField = null;
+    protected $validWiths = [];
 
     /**
      * PostFilter constructor.
@@ -38,10 +39,6 @@ class Filter extends MakeFilter
         $count = $entries->count();
         $sum = 0;
 
-        if ($this->sumField) {
-            $sum = $entries->sum($this->sumField);
-        }
-
         if ($this->hasFilter()) {
             $entries = $this->applyFilters($this->builder);
         }
@@ -64,6 +61,10 @@ class Filter extends MakeFilter
             }
         }
 
+        if($this->hasWith()){
+            $entries = $this->with($entries);
+        }
+
         return array($entries, $count, $sum);
     }
 
@@ -80,6 +81,7 @@ class Filter extends MakeFilter
 
         return $entries;
     }
+
 
     /**
      * @param $filters
@@ -309,6 +311,26 @@ class Filter extends MakeFilter
 
     /**
      * @param $entries
+     *
+     * @return Builder
+     */
+    protected function with($entries): Builder{
+        if(!empty($this->validWiths)) {
+            $final_validated_withs = [];
+            foreach ($this->withs as $with) {
+                if(in_array($with, $this->validWiths)){
+                    $final_validated_withs[] = $with;
+                }
+            }
+            if(!empty($final_validated_withs)){
+                $entries = $entries->with(implode(",", $final_validated_withs));
+            }
+        }
+        return $entries;
+    }
+
+    /**
+     * @param $entries
      * @param $filter
      * @param $relation
      * @param $isWhere
@@ -354,6 +376,13 @@ class Filter extends MakeFilter
         return !empty($this->sortData);
     }
 
+    /**
+     * @return bool
+     */
+    public function hasWith(): bool
+    {
+        return !empty($this->withs);
+    }
 
     /**
      * @throws \JsonException
@@ -381,6 +410,11 @@ class Filter extends MakeFilter
         $filters = Arr::get($requestData, 'filters', []);
         if (! empty($filters)) {
             $this->setFilters($filters);
+        }
+
+        $loadWiths = Arr::get($requestData, 'with', []);
+        if(! empty($loadWiths)){
+            $this->setWiths($loadWiths);
         }
     }
 }
