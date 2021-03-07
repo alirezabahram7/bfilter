@@ -12,6 +12,7 @@ class Filter extends MakeFilter
     protected $builder;
     protected $relations = [];
     protected $sumField = null;
+    protected $validWiths = [];
 
     /**
      * PostFilter constructor.
@@ -33,17 +34,12 @@ class Filter extends MakeFilter
      */
     public function apply($builder): array
     {
-        $this->builder = $builder;
         $entries = $builder;
         $count = $entries->count();
         $sum = 0;
 
-        if ($this->sumField) {
-            $sum = $entries->sum($this->sumField);
-        }
-
         if ($this->hasFilter()) {
-            $entries = $this->applyFilters($this->builder);
+            $entries = $this->applyFilters($entries);
         }
 
         if ($this->hasSort()) {
@@ -64,6 +60,11 @@ class Filter extends MakeFilter
             }
         }
 
+        if($this->hasWith()){
+            $entries = $this->with($entries);
+        }
+
+        $this->builder = $builder;
         return array($entries, $count, $sum);
     }
 
@@ -80,6 +81,7 @@ class Filter extends MakeFilter
 
         return $entries;
     }
+
 
     /**
      * @param $filters
@@ -309,6 +311,22 @@ class Filter extends MakeFilter
 
     /**
      * @param $entries
+     *
+     * @return Builder
+     */
+    protected function with($entries): Builder{
+        if(!empty($this->validWiths)) {
+            foreach ($this->withs as $with) {
+                if(in_array($with, $this->validWiths)){
+                    $entries = $entries->with($with);
+                }
+            }
+        }
+        return $entries;
+    }
+
+    /**
+     * @param $entries
      * @param $filter
      * @param $relation
      * @param $isWhere
@@ -354,6 +372,23 @@ class Filter extends MakeFilter
         return !empty($this->sortData);
     }
 
+    /**
+     * @return bool
+     */
+    public function hasWith(): bool
+    {
+        return !empty($this->withs);
+    }
+
+    public function toSql(){
+        if (! $this->builder instanceof  Builder){
+            throw new \RuntimeException("builder not created.");
+        }
+
+        $bindings = $this->builder->getBindings();
+        $sql = str_replace('?', '%s', $this->builder->toSql());
+        return vsprintf($sql, $bindings);
+    }
 
     /**
      * @throws \JsonException
@@ -376,11 +411,18 @@ class Filter extends MakeFilter
         $page = Arr::get($requestData, 'page', []);
         if (! empty($page)) {
             $this->setPage($page);
+        } else{
+            $this->setPage(['limit' => 100, 'offset' => 0]);
         }
 
         $filters = Arr::get($requestData, 'filters', []);
         if (! empty($filters)) {
             $this->setFilters($filters);
+        }
+
+        $loadWiths = Arr::get($requestData, 'with', []);
+        if(! empty($loadWiths)){
+            $this->setWiths($loadWiths);
         }
     }
 }
