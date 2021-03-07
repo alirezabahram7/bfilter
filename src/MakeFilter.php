@@ -12,6 +12,7 @@ class MakeFilter implements Jsonable
     protected $sortData = [];
     protected $offset = null;
     protected $limit = null;
+    protected $withs = [];
 
     /**
      * @param  array  $filters
@@ -150,6 +151,25 @@ class MakeFilter implements Jsonable
     /**
      * @return array
      */
+    public function getWiths(): array
+    {
+        return $this->withs;
+    }
+
+    /**
+     * @param  array  $loadWiths
+     *
+     * @return MakeFilter
+     */
+    public function setWiths(array $loadWiths)
+    {
+        $this->withs = (array)$loadWiths;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
     public function getFilters(): array
     {
         return $this->filters;
@@ -167,6 +187,7 @@ class MakeFilter implements Jsonable
         }
         return $this;
     }
+
 
     /**
      * @param $offset
@@ -189,6 +210,7 @@ class MakeFilter implements Jsonable
         $this->limit = (int)$limit;
         return $this;
     }
+
 
     /**
      * Encode a value as JSON.

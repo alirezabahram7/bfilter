@@ -60,6 +60,8 @@ class UserFilter extends Filter
         ];
         // you set this variabe if you want to have sum of your entries based of a specific field (f.e id here)
         $this->sumField = 'id';
+        // define valid eager loading relationships to protect loading unwanted data
+        $this->validWiths = ['comments', 'tags'];
     }
 }
 ```
@@ -95,6 +97,10 @@ filter:{
                         //full search : search a string in fields you set in its model "searchable" or "fillable" arrays
                         {"value" : "al"}
                     ]
+         ],
+         "with":[
+            "comments",
+            "tags"
          ]
 }
 ```
