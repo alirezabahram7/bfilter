@@ -34,13 +34,12 @@ class Filter extends MakeFilter
      */
     public function apply($builder): array
     {
-        $this->builder = $builder;
         $entries = $builder;
         $count = $entries->count();
         $sum = 0;
 
         if ($this->hasFilter()) {
-            $entries = $this->applyFilters($this->builder);
+            $entries = $this->applyFilters($entries);
         }
 
         if ($this->hasSort()) {
@@ -65,6 +64,7 @@ class Filter extends MakeFilter
             $entries = $this->with($entries);
         }
 
+        $this->builder = $builder;
         return array($entries, $count, $sum);
     }
 
@@ -380,6 +380,12 @@ class Filter extends MakeFilter
         return !empty($this->withs);
     }
 
+    public function toSql(){
+        $bindings = $this->builder->getBindings();
+        $sql = str_replace('?', '%s', $this->builder->toSql());
+        return vsprintf($sql, $bindings);
+    }
+
     /**
      * @throws \JsonException
      */
@@ -401,6 +407,8 @@ class Filter extends MakeFilter
         $page = Arr::get($requestData, 'page', []);
         if (! empty($page)) {
             $this->setPage($page);
+        } else{
+            $this->setPage(['limit' => 100, 'offset' => 0]);
         }
 
         $filters = Arr::get($requestData, 'filters', []);
