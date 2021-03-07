@@ -316,14 +316,10 @@ class Filter extends MakeFilter
      */
     protected function with($entries): Builder{
         if(!empty($this->validWiths)) {
-            $final_validated_withs = [];
             foreach ($this->withs as $with) {
                 if(in_array($with, $this->validWiths)){
-                    $final_validated_withs[] = $with;
+                    $entries = $entries->with($with);
                 }
-            }
-            if(!empty($final_validated_withs)){
-                $entries = $entries->with(implode(",", $final_validated_withs));
             }
         }
         return $entries;
