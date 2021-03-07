@@ -381,6 +381,10 @@ class Filter extends MakeFilter
     }
 
     public function toSql(){
+        if (! $this->builder instanceof  Builder){
+            throw new \RuntimeException("builder not created.");
+        }
+
         $bindings = $this->builder->getBindings();
         $sql = str_replace('?', '%s', $this->builder->toSql());
         return vsprintf($sql, $bindings);
