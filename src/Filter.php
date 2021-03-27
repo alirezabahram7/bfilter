@@ -124,8 +124,12 @@ class Filter extends MakeFilter
             return $this->whereNull($query, $item->field, 'and');
         }
 
-        if ($this->isWhereIn($item)) {
-            return $this->whereIn($query, $item);
+        if ($this->isWhereInOrNotIn($item)) {
+            if ($this->isWhereIn($item)) {
+                return $this->whereIn($query, $item);
+            } else{
+                return $this->whereNotIn($query, $item);
+            }
         }
 
         if(!isset($item->field) or $item->field === null){
@@ -147,8 +151,12 @@ class Filter extends MakeFilter
             return $this->whereNull($query, $item->field, 'or');
         }
 
-        if ($this->isWhereIn($item)) {
-            return $this->whereIn($query, $item);
+        if ($this->isWhereInOrNotIn($item)) {
+            if ($this->isWhereIn($item)) {
+                return $this->whereIn($query, $item);
+            } else{
+                return $this->whereNotIn($query, $item);
+            }
         }
 
         if(!isset($item->field) or $item->field == null){
@@ -166,6 +174,17 @@ class Filter extends MakeFilter
     protected function isWhereIn($item): bool
     {
         return ($item->op === 'in' and is_array($item->value));
+    }
+
+
+    /**
+     * @param $item
+     *
+     * @return bool
+     */
+    protected function isWhereInOrNotIn($item): bool
+    {
+        return (($item->op === 'in' || $item->op === 'not in') and is_array($item->value));
     }
 
     /**
@@ -187,6 +206,17 @@ class Filter extends MakeFilter
     public function whereIn($query, $item)
     {
         return $query->whereIn($item->field, $item->value);
+    }
+
+    /**
+     * @param $query
+     * @param $item
+     *
+     * @return mixed
+     */
+    public function whereNotIn($query, $item)
+    {
+        return $query->whereNotIn($item->field, $item->value);
     }
 
     /**
