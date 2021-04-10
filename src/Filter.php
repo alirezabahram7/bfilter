@@ -35,7 +35,6 @@ class Filter extends MakeFilter
     public function apply($builder): array
     {
         $entries = $builder;
-        $count = $entries->count();
         $sum = 0;
 
         if ($this->hasFilter()) {
