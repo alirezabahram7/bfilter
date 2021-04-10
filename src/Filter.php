@@ -317,7 +317,7 @@ class Filter extends MakeFilter
      */
     private function setRelationKey($item, $keyName)
     {
-        if (!empty($keyName)) {
+        if (!empty($keyName) and is_string($keyName)) {
             $item->field = $keyName;
         }
         return $item;
