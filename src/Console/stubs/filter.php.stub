@@ -11,5 +11,7 @@ class {{ class }} extends Filter
     {
         parent::__construct($request);
         $this->relations = [];
+
+        //$this->sumField = null;
     }
 }
