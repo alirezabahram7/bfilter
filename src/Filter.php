@@ -35,7 +35,6 @@ class Filter extends MakeFilter
     public function apply($builder): array
     {
         $entries = $builder;
-        $count = $entries->count();
         $sum = 0;
 
         if ($this->hasFilter()) {
@@ -317,7 +316,7 @@ class Filter extends MakeFilter
      */
     private function setRelationKey($item, $keyName)
     {
-        if (!empty($keyName)) {
+        if (!empty($keyName) and is_string($keyName)) {
             $item->field = $keyName;
         }
         return $item;
