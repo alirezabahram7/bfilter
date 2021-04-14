@@ -440,8 +440,6 @@ class Filter extends MakeFilter
         $page = Arr::get($requestData, 'page', []);
         if (! empty($page)) {
             $this->setPage($page);
-        } else{
-            $this->setPage(['limit' => 100, 'offset' => 0]);
         }
 
         $filters = Arr::get($requestData, 'filters', []);
