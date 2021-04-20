@@ -15,21 +15,6 @@ class MakeFilter implements Jsonable
     protected $withs = [];
 
     /**
-     * @param string field
-     *
-     * @return $this
-     */
-    public function removeFilter(string $field): MakeFilter
-    {
-        foreach ($this->filters as $key => $filter){
-            if ($filter['field'] === $field){
-                unset($this->filters[$key]);
-            }
-        }
-        return $this;
-    }
-
-    /**
      * @param  array  $filters
      *
      * @return $this
@@ -47,6 +32,26 @@ class MakeFilter implements Jsonable
     }
 
     /**
+     * @param string field
+     *
+     * @return $this
+     */
+    public function removeFilter(string $field): MakeFilter
+    {
+        foreach ($this->filters as $mainKey => &$filters){
+            foreach ($filters as $key => $filter) {
+                if ($filter->field === $field) {
+                    unset($filters[$key]);
+                }
+            }
+            if (empty($filters)){
+                unset($this->filters[$mainKey]);
+            }
+        }
+        return $this;
+    }
+
+    /**
      * @param $filters
      *
      * @return mixed
@@ -60,7 +65,7 @@ class MakeFilter implements Jsonable
             if (count($filter) !== 3) {
                 throw new \RuntimeException(
                     'filter is wrong.' . "\n"
-                    . 'filter muse have these keys: ' . join(', ', $keys) .
+                    . 'filter muse have these keys: ' . implode(', ', $keys) .
                     ".\n\r while " . print_r($constFilters, true)
                 );
             }
@@ -189,9 +194,11 @@ class MakeFilter implements Jsonable
      */
     public function getFilter(string $field): array
     {
-        foreach ($this->filters as $filter){
-            if ($filter['field'] === $field){
-                return $filter;
+        foreach ($this->filters as $filters){
+            foreach ($filters as $filter) {
+                if ($filter->field === $field) {
+                    return $filter;
+                }
             }
         }
         return [];
