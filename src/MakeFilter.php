@@ -15,6 +15,21 @@ class MakeFilter implements Jsonable
     protected $withs = [];
 
     /**
+     * @param string field
+     *
+     * @return $this
+     */
+    public function removeFilter(string $field): MakeFilter
+    {
+        foreach ($this->filters as $key => $filter){
+            if ($filter['field'] === $field){
+                unset($this->filters[$key]);
+            }
+        }
+        return $this;
+    }
+
+    /**
      * @param  array  $filters
      *
      * @return $this
@@ -165,6 +180,21 @@ class MakeFilter implements Jsonable
     {
         $this->withs = (array)$loadWiths;
         return $this;
+    }
+
+    /**
+     * @param string $field
+     *
+     * @return array
+     */
+    public function getFilter(string $field): array
+    {
+        foreach ($this->filters as $filter){
+            if ($filter['field'] === $field){
+                return $filter;
+            }
+        }
+        return [];
     }
 
     /**
