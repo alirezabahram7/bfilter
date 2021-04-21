@@ -192,7 +192,7 @@ class MakeFilter implements Jsonable
      *
      * @return array
      */
-    public function getFilter(string $field): array
+    public function getFilter(string $field): ?object
     {
         foreach ($this->filters as $filters){
             foreach ($filters as $filter) {
@@ -201,7 +201,7 @@ class MakeFilter implements Jsonable
                 }
             }
         }
-        return [];
+        return null;
     }
 
     /**
