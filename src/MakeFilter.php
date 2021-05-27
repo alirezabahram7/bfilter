@@ -273,6 +273,10 @@ class MakeFilter implements Jsonable
             $data['sort'] = $this->sortData;
         }
 
+        if (!empty($this->getWiths())) {
+            $data['with'] = $this->withs;
+        }
+
         return json_encode($data, JSON_THROW_ON_ERROR | $options
         );
     }
