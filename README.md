@@ -17,7 +17,10 @@ class MyModel extends Eloquent
     use HasFilter;
     
     // define fields for full text serach as "searchable" or "fillable"
-    protected searchable = [ 'first_name','last_name' ] 
+    protected $searchable = [ 
+    'first_name',
+    'last_name' 
+    ];
 }
 
 ```
