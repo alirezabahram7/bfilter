@@ -152,13 +152,13 @@ class Filter extends MakeFilter
 
         if ($this->isWhereInOrNotIn($item)) {
             if ($this->isWhereIn($item)) {
-                return $this->whereIn($query, $item);
-            } else{
-                return $this->whereNotIn($query, $item);
+                return $this->whereIn($query, $item, 'or');
             }
+
+            return $this->whereNotIn($query, $item, 'or');
         }
 
-        if(!isset($item->field) or $item->field == null){
+        if(!isset($item->field) || $item->field === null){
             return $query->fullSearch($item->value,true);
         }
 
@@ -197,25 +197,25 @@ class Filter extends MakeFilter
     }
 
     /**
-     * @param $query
+     * @param  Builder  $query
      * @param $item
-     *
-     * @return mixed
+     * @param  string  $boolean
+     * @return Builder
      */
-    public function whereIn($query, $item)
+    public function whereIn(Builder $query, $item, string $boolean = 'and'): Builder
     {
-        return $query->whereIn($item->field, $item->value);
+        return $query->whereIn($item->field, $item->value, $boolean);
     }
 
     /**
-     * @param $query
+     * @param  Builder  $query
      * @param $item
-     *
-     * @return mixed
+     * @param  string  $boolean
+     * @return Builder
      */
-    public function whereNotIn($query, $item)
+    public function whereNotIn(Builder $query, $item, string $boolean = 'and'): Builder
     {
-        return $query->whereNotIn($item->field, $item->value);
+        return $query->whereNotIn($item->field, $item->value, $boolean);
     }
 
     /**
