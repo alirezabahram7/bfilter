@@ -24,7 +24,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "BFilters\\Tests\\" : "tests"
+            "BFilters\\Tests\\" : "tests/"
         }
     },
     "extra": {
@@ -37,8 +37,9 @@
     "require": {
         "php": "^7.4|^8.0",
         "laravel/framework": "^7.0|^8.0",
-        "ext-json": "*",
-        "symfony/console": "^5.0",
+        "ext-json": "*"
+    },
+    "require-dev": {
         "orchestra/testbench": "^6.20"
     },
     "minimum-stability": "stable"
