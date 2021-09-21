@@ -107,3 +107,19 @@ filter:{
          ]
 }
 ```
+
+
+
+### Query String Sample:
+
+// pagination per_page=10 page=0 :
+?filter={"page":{"limit": 10,"offset": 0}}
+
+// pagination per_page=20 and page=0 (sort_by id desc) :
+?filter=%7B%22page%22:%7B%22limit%22:20,%22offset%22:0%7D,%22sort%22:[%7B%22field%22:%22id%22,%22dir%22:%22desc%22%7D]%7D
+
+// like before field comment like aaaaaaaaa :
+?filter=%7B%22page%22:%7B%22limit%22:20,%22offset%22:0%7D,%22sort%22:[%7B%22field%22:%22id%22,%22dir%22:%22desc%22%7D],%22filters%22:[[%7B%22field%22:%22comment%22,%22op%22:%22like%22,%22value%22:%22aaaaaaaa%22%7D]]%7D
+
+
+
