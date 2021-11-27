@@ -17,7 +17,10 @@ class MyModel extends Eloquent
     use HasFilter;
     
     // define fields for full text serach as "searchable" or "fillable"
-    protected searchable = [ 'first_name','last_name' ] 
+    protected $searchable = [ 
+    'first_name',
+    'last_name' 
+    ];
 }
 
 ```
@@ -60,6 +63,8 @@ class UserFilter extends Filter
         ];
         // you set this variabe if you want to have sum of your entries based of a specific field (f.e id here)
         $this->sumField = 'id';
+        // define valid eager loading relationships to protect loading unwanted data
+        $this->validWiths = ['comments', 'tags'];
     }
 }
 ```
@@ -95,6 +100,26 @@ filter:{
                         //full search : search a string in fields you set in its model "searchable" or "fillable" arrays
                         {"value" : "al"}
                     ]
+         ],
+         "with":[
+            "comments",
+            "tags"
          ]
 }
 ```
+
+
+
+## Query String Samples:
+
+### pagination per_page=10 page=0 :
+?filter={"page":{"limit": 10,"offset": 0}}
+
+### pagination per_page=20 and page=0 (sort_by id desc) :
+?filter=%7B%22page%22:%7B%22limit%22:20,%22offset%22:0%7D,%22sort%22:[%7B%22field%22:%22id%22,%22dir%22:%22desc%22%7D]%7D
+
+### like before field comment like aaaaaaaaa :
+?filter=%7B%22page%22:%7B%22limit%22:20,%22offset%22:0%7D,%22sort%22:[%7B%22field%22:%22id%22,%22dir%22:%22desc%22%7D],%22filters%22:[[%7B%22field%22:%22comment%22,%22op%22:%22like%22,%22value%22:%22aaaaaaaa%22%7D]]%7D
+
+
+

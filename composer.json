@@ -22,6 +22,11 @@
             "BFilters\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "BFilters\\Tests\\" : "tests/"
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [
@@ -30,10 +35,12 @@
         }
     },
     "require": {
-        "php": "^7.2|^7.3|^7.4",
+        "php": "^7.4|^8.0",
         "laravel/framework": "^7.0|^8.0",
-        "ext-json": "*",
-        "symfony/console": "^5.0"
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.20"
     },
     "minimum-stability": "stable"
 }

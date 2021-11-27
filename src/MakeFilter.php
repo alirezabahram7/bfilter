@@ -12,6 +12,7 @@ class MakeFilter implements Jsonable
     protected $sortData = [];
     protected $offset = null;
     protected $limit = null;
+    protected $withs = [];
 
     /**
      * @param  array  $filters
@@ -31,6 +32,26 @@ class MakeFilter implements Jsonable
     }
 
     /**
+     * @param string field
+     *
+     * @return $this
+     */
+    public function removeFilter(string $field): MakeFilter
+    {
+        foreach ($this->filters as $mainKey => &$filters){
+            foreach ($filters as $key => $filter) {
+                if ($filter->field === $field) {
+                    unset($filters[$key]);
+                }
+            }
+            if (empty($filters)){
+                unset($this->filters[$mainKey]);
+            }
+        }
+        return $this;
+    }
+
+    /**
      * @param $filters
      *
      * @return mixed
@@ -44,7 +65,7 @@ class MakeFilter implements Jsonable
             if (count($filter) !== 3) {
                 throw new \RuntimeException(
                     'filter is wrong.' . "\n"
-                    . 'filter muse have these keys: ' . join(', ', $keys) .
+                    . 'filter muse have these keys: ' . implode(', ', $keys) .
                     ".\n\r while " . print_r($constFilters, true)
                 );
             }
@@ -150,6 +171,42 @@ class MakeFilter implements Jsonable
     /**
      * @return array
      */
+    public function getWiths(): array
+    {
+        return $this->withs;
+    }
+
+    /**
+     * @param  array  $loadWiths
+     *
+     * @return MakeFilter
+     */
+    public function setWiths(array $loadWiths)
+    {
+        $this->withs = (array)$loadWiths;
+        return $this;
+    }
+
+    /**
+     * @param string $field
+     *
+     * @return array
+     */
+    public function getFilter(string $field): ?object
+    {
+        foreach ($this->filters as $filters){
+            foreach ($filters as $filter) {
+                if ($filter->field === $field) {
+                    return $filter;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return array
+     */
     public function getFilters(): array
     {
         return $this->filters;
@@ -167,6 +224,7 @@ class MakeFilter implements Jsonable
         }
         return $this;
     }
+
 
     /**
      * @param $offset
@@ -190,6 +248,7 @@ class MakeFilter implements Jsonable
         return $this;
     }
 
+
     /**
      * Encode a value as JSON.
      *
@@ -212,6 +271,10 @@ class MakeFilter implements Jsonable
 
         if (!empty($this->sortData)) {
             $data['sort'] = $this->sortData;
+        }
+
+        if (!empty($this->getWiths())) {
+            $data['with'] = $this->withs;
         }
 
         return json_encode($data, JSON_THROW_ON_ERROR | $options

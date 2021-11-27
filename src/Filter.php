@@ -12,6 +12,7 @@ class Filter extends MakeFilter
     protected $builder;
     protected $relations = [];
     protected $sumField = null;
+    protected $validWiths = [];
 
     /**
      * PostFilter constructor.
@@ -33,17 +34,11 @@ class Filter extends MakeFilter
      */
     public function apply($builder): array
     {
-        $this->builder = $builder;
         $entries = $builder;
-        $count = $entries->count();
         $sum = 0;
 
-        if ($this->sumField) {
-            $sum = $entries->sum($this->sumField);
-        }
-
         if ($this->hasFilter()) {
-            $entries = $this->applyFilters($this->builder);
+            $entries = $this->applyFilters($entries);
         }
 
         if ($this->hasSort()) {
@@ -64,6 +59,11 @@ class Filter extends MakeFilter
             }
         }
 
+        if($this->hasWith()){
+            $entries = $this->with($entries);
+        }
+
+        $this->builder = $builder;
         return array($entries, $count, $sum);
     }
 
@@ -80,6 +80,7 @@ class Filter extends MakeFilter
 
         return $entries;
     }
+
 
     /**
      * @param $filters
@@ -122,8 +123,12 @@ class Filter extends MakeFilter
             return $this->whereNull($query, $item->field, 'and');
         }
 
-        if ($this->isWhereIn($item)) {
-            return $this->whereIn($query, $item);
+        if ($this->isWhereInOrNotIn($item)) {
+            if ($this->isWhereIn($item)) {
+                return $this->whereIn($query, $item);
+            } else{
+                return $this->whereNotIn($query, $item);
+            }
         }
 
         if(!isset($item->field) or $item->field === null){
@@ -145,11 +150,15 @@ class Filter extends MakeFilter
             return $this->whereNull($query, $item->field, 'or');
         }
 
-        if ($this->isWhereIn($item)) {
-            return $this->whereIn($query, $item);
+        if ($this->isWhereInOrNotIn($item)) {
+            if ($this->isWhereIn($item)) {
+                return $this->whereIn($query, $item, 'or');
+            }
+
+            return $this->whereNotIn($query, $item, 'or');
         }
 
-        if(!isset($item->field) or $item->field == null){
+        if(!isset($item->field) || $item->field === null){
             return $query->fullSearch($item->value,true);
         }
 
@@ -166,6 +175,17 @@ class Filter extends MakeFilter
         return ($item->op === 'in' and is_array($item->value));
     }
 
+
+    /**
+     * @param $item
+     *
+     * @return bool
+     */
+    protected function isWhereInOrNotIn($item): bool
+    {
+        return (($item->op === 'in' || $item->op === 'not in') and is_array($item->value));
+    }
+
     /**
      * @param $item
      *
@@ -177,14 +197,25 @@ class Filter extends MakeFilter
     }
 
     /**
-     * @param $query
+     * @param  Builder  $query
      * @param $item
-     *
-     * @return mixed
+     * @param  string  $boolean
+     * @return Builder
      */
-    public function whereIn($query, $item)
+    public function whereIn(Builder $query, $item, string $boolean = 'and'): Builder
     {
-        return $query->whereIn($item->field, $item->value);
+        return $query->whereIn($item->field, $item->value, $boolean);
+    }
+
+    /**
+     * @param  Builder  $query
+     * @param $item
+     * @param  string  $boolean
+     * @return Builder
+     */
+    public function whereNotIn(Builder $query, $item, string $boolean = 'and'): Builder
+    {
+        return $query->whereNotIn($item->field, $item->value, $boolean);
     }
 
     /**
@@ -285,7 +316,7 @@ class Filter extends MakeFilter
      */
     private function setRelationKey($item, $keyName)
     {
-        if (!empty($keyName)) {
+        if (!empty($keyName) and is_string($keyName)) {
             $item->field = $keyName;
         }
         return $item;
@@ -303,6 +334,22 @@ class Filter extends MakeFilter
             $field = $sortDatum->field;
             $dir = $sortDatum->dir;
             $entries = $entries->orderBy($field, $dir);
+        }
+        return $entries;
+    }
+
+    /**
+     * @param $entries
+     *
+     * @return Builder
+     */
+    protected function with($entries): Builder{
+        if(!empty($this->validWiths)) {
+            foreach ($this->withs as $with) {
+                if(in_array($with, $this->validWiths)){
+                    $entries = $entries->with($with);
+                }
+            }
         }
         return $entries;
     }
@@ -354,6 +401,23 @@ class Filter extends MakeFilter
         return !empty($this->sortData);
     }
 
+    /**
+     * @return bool
+     */
+    public function hasWith(): bool
+    {
+        return !empty($this->withs);
+    }
+
+    public function toSql(){
+        if (! $this->builder instanceof  Builder){
+            throw new \RuntimeException("builder not created.");
+        }
+
+        $bindings = $this->builder->getBindings();
+        $sql = str_replace('?', '%s', $this->builder->toSql());
+        return vsprintf($sql, $bindings);
+    }
 
     /**
      * @throws \JsonException
@@ -381,6 +445,11 @@ class Filter extends MakeFilter
         $filters = Arr::get($requestData, 'filters', []);
         if (! empty($filters)) {
             $this->setFilters($filters);
+        }
+
+        $loadWiths = Arr::get($requestData, 'with', []);
+        if(! empty($loadWiths)){
+            $this->setWiths($loadWiths);
         }
     }
 }
