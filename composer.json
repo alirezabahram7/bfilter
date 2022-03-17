@@ -7,11 +7,24 @@
         {
             "name": "Alireza Bahram",
             "email": "alib327@gmail.com"
+        },
+        {
+            "name": "Hossein Ebrahimzadeh",
+            "email": "abi.hossein@gmail.com"
+        },
+        {
+            "name": "Omid Alizadeh",
+            "email": "om.alizadeh1@gmail.com"
         }
     ],
     "autoload": {
         "psr-4": {
             "BFilters\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BFilters\\Tests\\" : "tests/"
         }
     },
     "extra": {
@@ -22,10 +35,12 @@
         }
     },
     "require": {
-        "php" : "^7.0",
-        "laravel/framework": "^7.24",
-        "ext-json": "*",
-        "symfony/console" : "^5.0"
+        "php": "^7.4|^8.0",
+        "laravel/framework": "^7.0|^8.0",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.20"
     },
     "minimum-stability": "stable"
 }
