@@ -10,6 +10,7 @@ class MakeFilter implements Jsonable
 {
     protected $filters = [];
     protected $sortData = [];
+    protected $paginationData = [];
     protected $offset = null;
     protected $limit = null;
     protected $withs = [];
@@ -50,6 +51,13 @@ class MakeFilter implements Jsonable
         }
         return $this;
     }
+
+    public function removePagination() : makeFilter
+    {
+        unset($this->paginationData);
+        return $this;
+    }
+
 
     /**
      * @param $filters
@@ -140,6 +148,11 @@ class MakeFilter implements Jsonable
         return $this;
     }
 
+    public function getPaginationData(): array
+    {
+        return $this->paginationData;
+    }
+
     /**
      * @return array
      */
@@ -158,6 +171,7 @@ class MakeFilter implements Jsonable
      */
     public function setPage(array $page)
     {
+        $this->paginationData = $page;
         if (! empty($page['limit'])) {
             $this->limit($page['limit']);
         }
@@ -265,8 +279,8 @@ class MakeFilter implements Jsonable
         if (!empty($this->filters)) {
             $data['filters'] = $this->filters;
         }
-        if (!empty($page = $this->getPage())) {
-            $data['page'] = $page;
+        if (!empty($this->paginationData)) {
+            $data['page'] = $this->paginationData;
         }
 
         if (!empty($this->sortData)) {
