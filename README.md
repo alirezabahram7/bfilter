@@ -109,7 +109,7 @@ filter:{
 ```
 
 
-## If you have need custom filter on relation :
+## If you need custom filter on relation : (For example array search in postgresql) :
 In Request
 ```
 
