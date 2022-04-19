@@ -316,7 +316,7 @@ class Filter extends MakeFilter
      */
     private function setRelationKey($item, $keyName)
     {
-        if (!empty($keyName) and is_string($keyName)) {
+        if (!empty($keyName) && (is_string($keyName) || is_callable($keyName))) {
             $item->field = $keyName;
         }
         return $item;
@@ -368,19 +368,16 @@ class Filter extends MakeFilter
         $relation,
         $isWhere
     ): Builder {
+        $call = function ($query) use ($filter) {is_callable($filter->field) ? ($filter->field)($query, $filter)  : $this->where($query, $filter);} ;
         if (!$isWhere) {
             return $entries->orWhereHas(
                 $relation,
-                function ($query) use ($filter) {
-                    $this->where($query, $filter);
-                }
+                $call
             );
         }
         return $entries->whereHas(
             $relation,
-            function ($query) use ($filter) {
-                $this->where($query, $filter);
-            }
+            $call
         );
     }
 
