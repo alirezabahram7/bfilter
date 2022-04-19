@@ -368,16 +368,16 @@ class Filter extends MakeFilter
         $relation,
         $isWhere
     ): Builder {
-        $call = function ($query) use ($filter) {is_callable($filter->field) ? ($filter->field)($query, $filter)  : $this->where($query, $filter);} ;
+        $callFunction = function ($query) use ($filter) {is_callable($filter->field) ? ($filter->field)($query, $filter)  : $this->where($query, $filter);} ;
         if (!$isWhere) {
             return $entries->orWhereHas(
                 $relation,
-                $call
+                $callFunction
             );
         }
         return $entries->whereHas(
             $relation,
-            $call
+            $callFunction
         );
     }
 
