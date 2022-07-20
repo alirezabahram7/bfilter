@@ -5,7 +5,7 @@ with query string parameters. <br>
 
 ### Installation
 ```
-composer require behamin/bfilters
+composer require alirezabahram7/bfilters
 ```
 ### Updating your Eloquent Models
 Your models should use the `HasFilter` trait:  
@@ -109,7 +109,7 @@ filter:{
 ```
 
 Add Rules Validation
-####for check filters before apply add this method to your filter file:
+#### for check filters before apply add this method to your filter file:
 ```
 public function rules()
 {
