@@ -108,6 +108,18 @@ filter:{
 }
 ```
 
+Add Rules Validation
+####for check filters before apply add this method to your filter file:
+```
+public function rules()
+{
+    return [
+        'id' => 'int|required',
+        'user_id' => 'exists:users,id'
+    ];
+}
+```
+
 
 ## If you need custom filter on relation : (For example array search in postgresql) :
 In Request
