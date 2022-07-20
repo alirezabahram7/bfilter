@@ -2,9 +2,11 @@
 
 namespace BFilters;
 
+use BFilters\Exceptions\ValidationException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Validator;
 
 class Filter extends MakeFilter
 {
@@ -17,14 +19,15 @@ class Filter extends MakeFilter
     /**
      * PostFilter constructor.
      *
-     * @param  Request  $request
-     *
+     * @param Request $request
      * @throws \JsonException
+     * @throws ValidationException
      */
     public function __construct(Request $request)
     {
         $this->request = $request;
         $this->getParamFilters();
+        $this->checkRules();
     }
 
     /**
@@ -450,6 +453,32 @@ class Filter extends MakeFilter
         $loadWiths = Arr::get($requestData, 'with', []);
         if(! empty($loadWiths)){
             $this->setWiths($loadWiths);
+        }
+    }
+
+    // if set rule check in filters
+    // rules structure must be like laravel validations
+    public function rules()
+    {
+        return [];
+    }
+
+    public function checkRules(array $rules = [])
+    {
+        $rules = array_merge($rules, $this->rules());
+
+        $dataFoValidation = array_map(function ($items) {
+            return array_map(function ($item) {
+                return [$item->field => $item->value];
+            }, $items);
+        }, $this->getFilters());
+
+        $dataFoValidation = collect($dataFoValidation)->collapse()->collapse()->toArray();
+
+        $validatedData = Validator::make($dataFoValidation, $rules);
+
+        if ($validatedData->fails()) {
+            throw new ValidationException($validatedData->errors()->getMessages());
         }
     }
 }
