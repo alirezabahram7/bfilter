@@ -1,5 +1,5 @@
 {
-    "name": "behamin/bfilters",
+    "name": "bahram/bfilters",
     "description": "A package for customized filtering on eloquent models",
     "type": "library",
     "license": "MIT",
