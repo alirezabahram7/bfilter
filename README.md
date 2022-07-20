@@ -1,4 +1,4 @@
-# Behamin Filter
+# Laravel Model Filter
 apply auto filters in Eloquent. <br>
 with this package, easily apply filters, sort and paginatation on Eloquent models and their relations. <br>
 with query string parameters. <br>    
