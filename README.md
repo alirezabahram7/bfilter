@@ -1,11 +1,15 @@
-# Laravel Model Filter
+# Bahram Filter
 apply auto filters in Eloquent. <br>
-with this package, easily apply filters, sort and paginatation on Eloquent models and their relations. <br>
+with this package, easily apply filters, sort and pagination on Eloquent models and their relations. <br>
 with query string parameters. <br>    
+
+### Requirements
+php: ^7.4|^8.0|^8.1
+laravel: >=6.0
 
 ### Installation
 ```
-composer require alirezabahram7/bfilters
+composer require bahram/bfilters
 ```
 ### Updating your Eloquent Models
 Your models should use the `HasFilter` trait:  
@@ -16,7 +20,7 @@ class MyModel extends Eloquent
 {
     use HasFilter;
     
-    // define fields for full text serach as "searchable" or "fillable"
+    // Define fields for full text serach as "searchable" or "fillable"
     protected $searchable = [ 
     'first_name',
     'last_name' 
@@ -78,7 +82,7 @@ public function index(YourModelFilter $filters): Response
 }
 ```
 
-In Request
+In Requests
 ```
 filter:{
         "sort":[
@@ -109,7 +113,7 @@ filter:{
 ```
 
 Add Rules Validation
-#### for check filters before apply add this method to your filter file:
+####To validate filters before applying it, add this method to your filter file:
 ```
 public function rules()
 {
@@ -152,19 +156,13 @@ class MessageFilter extends Filter
 
 ## Query String Samples:
 
-### pagination per_page=10 page=0 :
+### pagination: per_page=10 :
 ?filter={"page":{"limit": 10,"offset": 0}}
 
-### pagination per_page=20 and page=0 (sort_by id desc) :
-?filter=%7B%22page%22:%7B%22limit%22:20,%22offset%22:0%7D,%22sort%22:[%7B%22field%22:%22id%22,%22dir%22:%22desc%22%7D]%7D
-```
-{"page":{"limit":20,"offset":0},"sort":[{"field":"id","dir":"desc"}]}
-```
+### pagination per_page=20 and (ordered by `id` desc) :
+?filter={"page":{"limit":20,"offset":0},"sort":[{"field":"id","dir":"desc"}]}
 
-### like before field comment like aaaaaaaaa :
-?filter=%7B%22page%22:%7B%22limit%22:20,%22offset%22:0%7D,%22sort%22:[%7B%22field%22:%22id%22,%22dir%22:%22desc%22%7D],%22filters%22:[[%7B%22field%22:%22comment%22,%22op%22:%22like%22,%22value%22:%22aaaaaaaa%22%7D]]%7D
-```
-{"page":{"limit":20,"offset":0},"sort":[{"field":"id","dir":"desc"}],"filters":[[{"field":"comment","op":"like","value":"aaaaaaaa"}]]}
-```
+### add a filter : name like john :
+?filter={"page":{"limit":20,"offset":0},"sort":[{"field":"id","dir":"desc"}],"filters":[[{"field":"name","op":"like","value":"john"}]]}
 
 
