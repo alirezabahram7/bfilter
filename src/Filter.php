@@ -10,11 +10,11 @@ use Illuminate\Support\Facades\Validator;
 
 class Filter extends MakeFilter
 {
-    protected $request;
+    protected Request $request;
     protected $builder;
-    protected $relations = [];
+    protected array $relations = [];
     protected $sumField = null;
-    protected $validWiths = [];
+    protected array $validWiths = [];
 
     /**
      * PostFilter constructor.

@@ -9,7 +9,7 @@ trait HasFilter
      * @param $filters
      * @return mixed
      */
-    public function scopeFilter($query, $filters)
+    public function scopeFilter($query, $filters): mixed
     {
         return $filters->apply($query);
     }
@@ -20,10 +20,10 @@ trait HasFilter
      * @param bool $beginsWithOr
      * @return mixed
      */
-    public function scopeFullSearch($query, $term, $beginsWithOr = false)
+    public function scopeFullSearch($query, $term, bool $beginsWithOr = false): mixed
     {
         if (isset($this->searchable) or isset($this->fillable)) {
-            $columns = isset($this->searchable) ? $this->searchable : $this->fillable;
+            $columns = $this->searchable ?? $this->fillable;
             foreach ($columns as $c => $column) {
                 if ( ! $beginsWithOr and $c == 0) {
                     $query->where($column, 'like', '%' . $term . '%');

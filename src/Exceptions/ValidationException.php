@@ -1,7 +1,7 @@
 <?php
 namespace  BFilters\Exceptions;
 
-use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 
 /**
@@ -13,7 +13,7 @@ class ValidationException extends ExceptionAbstract
 {
     public function __construct(
         $message,
-        string $errorCode = JsonResponse::HTTP_UNPROCESSABLE_ENTITY,
+        string $errorCode = Response::HTTP_UNPROCESSABLE_ENTITY,
         \Throwable $previous = null
     ) {
         parent::__construct($message, $errorCode , $previous);
