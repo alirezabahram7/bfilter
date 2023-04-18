@@ -13,7 +13,7 @@ For miner php|Laravel versions use other releases.
 ```
 composer require bahram/bfilters
 ```
-### Updating your Eloquent Models
+### Use HasFilter Trait On your Eloquent Models
 Your models should use the `HasFilter` trait:  
 ```
 use BFilters\Traits;
@@ -39,7 +39,7 @@ php artisan make:filter UserFilter
 
 
 ```
-### In Created Filter Class
+### In your Created Filter Class
 ```
 use Illuminate\Http\Request;
 
@@ -114,7 +114,7 @@ filter:{
 }
 ```
 
-Add Rules Validation
+Add Validation Rules
 ####To validate filters before applying it, add this method to your filter file:
 ```
 public function rules()
