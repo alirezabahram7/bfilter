@@ -4,8 +4,10 @@ with this package, easily apply filters, sort and pagination on Eloquent models 
 with query string parameters. <br>    
 
 ### Requirements
-php: ^7.4|^8.0|^8.1
-laravel: >=6.0
+php: `^8.0|^8.1` <br>
+laravel: `>=8.0` <br><br>
+
+For miner php|Laravel versions use other releases.
 
 ### Installation
 ```

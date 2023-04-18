@@ -1,4 +1,5 @@
 <?php
+
 namespace BFilters\Exceptions;
 
 
@@ -17,23 +18,23 @@ abstract class ExceptionAbstract extends \Exception
      * @var null|int
      */
 
-    private $errorCode ;
+    private ?int $errorCode;
 
     /**
      * List of validation errors!
      *
      * @var array
      */
-    private $errors = [];
+    private array $errors = [];
 
     /**
      * ExceptionAbstract constructor.
      *
-     * @param $message
-     * @param null $errorCode
+     * @param                 $message
+     * @param int|null        $errorCode
      * @param \Throwable|null $previous
      */
-    public function __construct($message, $errorCode = null,  \Throwable $previous = null)
+    public function __construct($message, ?int $errorCode = null, \Throwable $previous = null)
     {
         $this->errorCode = $errorCode;
 
@@ -46,13 +47,12 @@ abstract class ExceptionAbstract extends \Exception
     }
 
 
-
     /**
      * Get error array.
      *
      * @return array
      */
-    public function getErrors()
+    public function getErrors(): array
     {
         return $this->errors;
     }
@@ -62,7 +62,7 @@ abstract class ExceptionAbstract extends \Exception
      *
      * @return int
      */
-    public function getErrorCode()
+    public function getErrorCode(): ?int
     {
         return $this->errorCode;
     }

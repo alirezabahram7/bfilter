@@ -8,27 +8,34 @@ use Illuminate\Support\Arr;
 
 class MakeFilter implements Jsonable
 {
-    protected $filters = [];
-    protected $sortData = [];
-    protected $paginationData = [];
-    protected $offset = null;
-    protected $limit = null;
-    protected $withs = [];
+    protected array $filters = [];
+    protected array $sortData = [];
+    protected array $paginationData = [];
+    protected ?int $offset = null;
+    protected ?int $limit = null;
+    protected array $withs = [];
 
     /**
-     * @param  array  $filters
+     * @param array $filters
      *
      * @return $this
      */
-    public function addFilter(array $filters)
+    public function addFilter(array $filters): MakeFilter
     {
         $filters = $this->prepareAddFilter($filters);
         $this->filters[] = $filters;
+
         return $this;
     }
 
-    public function addMagicFilter(array $filter){
+    /**
+     * @param array $filter
+     * @return $this
+     */
+    public function addMagicFilter(array $filter): MakeFilter
+    {
         $filter = ['field' => ($key = key($filter)), 'value' => $filter[$key], 'op' => '='];
+
         return $this->addFilter([$filter]);
     }
 
@@ -39,22 +46,27 @@ class MakeFilter implements Jsonable
      */
     public function removeFilter(string $field): MakeFilter
     {
-        foreach ($this->filters as $mainKey => &$filters){
+        foreach ($this->filters as $mainKey => &$filters) {
             foreach ($filters as $key => $filter) {
                 if ($filter->field === $field) {
                     unset($filters[$key]);
                 }
             }
-            if (empty($filters)){
+            if (empty($filters)) {
                 unset($this->filters[$mainKey]);
             }
         }
+
         return $this;
     }
 
-    public function removePagination() : makeFilter
+    /**
+     * @return $this
+     */
+    public function removePagination(): makeFilter
     {
         unset($this->paginationData);
+
         return $this;
     }
 
@@ -62,9 +74,9 @@ class MakeFilter implements Jsonable
     /**
      * @param $filters
      *
-     * @return mixed
+     * @return array
      */
-    public function prepareAddFilter($filters)
+    public function prepareAddFilter($filters): array
     {
         $keys = ['field', 'op', 'value'];
         $constFilters = $filters;
@@ -79,6 +91,7 @@ class MakeFilter implements Jsonable
             }
             $filter = (object)$filter;
         }
+
         return $filters;
     }
 
@@ -88,12 +101,12 @@ class MakeFilter implements Jsonable
      *
      * @return MakeFilter
      */
-    public function orderBy($field, $dir)
+    public function orderBy($field, $dir): MakeFilter
     {
         return $this->addOrder(
             [
                 'field' => $field,
-                'dir'   => $dir
+                'dir' => $dir
             ]
         );
     }
@@ -103,27 +116,29 @@ class MakeFilter implements Jsonable
      *
      * @return $this
      */
-    public function addOrder($sortData)
+    public function addOrder($sortData): MakeFilter
     {
         $sortData = $this->prepareAddOrder($sortData);
         $this->sortData[] = $sortData;
+
         return $this;
     }
 
+
     /**
      * @param $sortData
-     *
-     * @return array
+     * @return object
      */
-    public function prepareAddOrder($sortData)
+    public function prepareAddOrder($sortData): object
     {
         $constSortData = $sortData;
         $sortData = Arr::only($sortData, ['field', 'dir']);
         if (count($sortData) !== 2) {
             throw new \RuntimeException(
-                'order data wrong.'."\n".print_r($constSortData, true)
+                'order data wrong.' . "\n" . print_r($constSortData, true)
             );
         }
+
         return (object)$sortData;
     }
 
@@ -136,7 +151,7 @@ class MakeFilter implements Jsonable
     }
 
     /**
-     * @param  array  $sortDataList
+     * @param array $sortDataList
      *
      * @return MakeFilter
      */
@@ -145,6 +160,7 @@ class MakeFilter implements Jsonable
         foreach ($sortDataList as $sortData) {
             $this->addOrder($sortData);
         }
+
         return $this;
     }
 
@@ -165,20 +181,21 @@ class MakeFilter implements Jsonable
     }
 
     /**
-     * @param  array  $page
+     * @param array $page
      *
      * @return MakeFilter
      */
-    public function setPage(array $page)
+    public function setPage(array $page): MakeFilter
     {
         $this->paginationData = $page;
-        if (! empty($page['limit'])) {
+        if (!empty($page['limit'])) {
             $this->limit($page['limit']);
         }
 
         if (isset($page['offset'])) {
             $this->offset($page['offset']);
         }
+
         return $this;
     }
 
@@ -191,30 +208,32 @@ class MakeFilter implements Jsonable
     }
 
     /**
-     * @param  array  $loadWiths
+     * @param array $loadWiths
      *
      * @return MakeFilter
      */
-    public function setWiths(array $loadWiths)
+    public function setWiths(array $loadWiths): MakeFilter
     {
         $this->withs = (array)$loadWiths;
+
         return $this;
     }
 
     /**
      * @param string $field
      *
-     * @return array
+     * @return object|null
      */
     public function getFilter(string $field): ?object
     {
-        foreach ($this->filters as $filters){
+        foreach ($this->filters as $filters) {
             foreach ($filters as $filter) {
                 if ($filter->field === $field) {
                     return $filter;
                 }
             }
         }
+
         return null;
     }
 
@@ -227,15 +246,16 @@ class MakeFilter implements Jsonable
     }
 
     /**
-     * @param  array  $filtersList
+     * @param array $filtersList
      *
      * @return MakeFilter
      */
-    public function setFilters(array $filtersList)
+    public function setFilters(array $filtersList): MakeFilter
     {
         foreach ($filtersList as $filters) {
             $this->addFilter($filters);
         }
+
         return $this;
     }
 
@@ -245,9 +265,10 @@ class MakeFilter implements Jsonable
      *
      * @return MakeFilter
      */
-    public function offset($offset)
+    public function offset($offset): MakeFilter
     {
         $this->offset = (int)$offset;
+
         return $this;
     }
 
@@ -256,9 +277,10 @@ class MakeFilter implements Jsonable
      *
      * @return MakeFilter
      */
-    public function limit($limit)
+    public function limit($limit): MakeFilter
     {
         $this->limit = (int)$limit;
+
         return $this;
     }
 
@@ -266,12 +288,12 @@ class MakeFilter implements Jsonable
     /**
      * Encode a value as JSON.
      *
-     * @param  int  $options
+     * @param int $options
      *
      * @return string
      * @throws \JsonException
      */
-    public function toJson($options = 0)
+    public function toJson($options = 0): string
     {
         $options |= JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
         $data = [];
@@ -291,7 +313,9 @@ class MakeFilter implements Jsonable
             $data['with'] = $this->withs;
         }
 
-        return json_encode($data, JSON_THROW_ON_ERROR | $options
+        return json_encode(
+            $data,
+            JSON_THROW_ON_ERROR | $options
         );
     }
 
