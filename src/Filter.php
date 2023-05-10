@@ -96,13 +96,16 @@ class Filter extends MakeFilter
         return $entries->where(
             function ($query) use ($filters) {
                 foreach ($filters as $filterKey => $item) {
-                    $item = $this->prepareFilter($item);
-                    if (!$this->applyRelations(
-                        $query,
-                        $item,
-                        $filterKey === 0
-                    )
-                    ) {
+                    $relationQueryFlag = false;
+                    if (isset($item->field)) {
+                        $item = $this->prepareFilter($item);
+                        $relationQueryFlag = $this->applyRelations(
+                            $query,
+                            $item,
+                            $filterKey === 0
+                        );
+                    }
+                    if (!$relationQueryFlag) {
                         if ($filterKey === 0) {
                             $this->where($query, $item);
                         } else {
@@ -122,6 +125,10 @@ class Filter extends MakeFilter
      */
     protected function where($query, $item): Builder
     {
+        if(!isset($item->field) or $item->field === null){
+            return $query->fullSearch($item->value);
+        }
+
         if ($this->isWhereNull($item)) {
             return $this->whereNull($query, $item->field, 'and');
         }
@@ -132,10 +139,6 @@ class Filter extends MakeFilter
             } else{
                 return $this->whereNotIn($query, $item);
             }
-        }
-
-        if(!isset($item->field) or $item->field === null){
-            return $query->fullSearch($item->value);
         }
 
         return $query->where($item->field, $item->op, $item->value);
@@ -149,6 +152,10 @@ class Filter extends MakeFilter
      */
     protected function orWhere($query, $item)
     {
+        if(!isset($item->field) || $item->field === null){
+            return $query->fullSearch($item->value,true);
+        }
+
         if ($this->isWhereNull($item)) {
             return $this->whereNull($query, $item->field, 'or');
         }
@@ -159,10 +166,6 @@ class Filter extends MakeFilter
             }
 
             return $this->whereNotIn($query, $item, 'or');
-        }
-
-        if(!isset($item->field) || $item->field === null){
-            return $query->fullSearch($item->value,true);
         }
 
         return $query->orWhere($item->field, $item->op, $item->value);

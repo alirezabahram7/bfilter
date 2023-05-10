@@ -82,7 +82,7 @@ class MakeFilter implements Jsonable
         $constFilters = $filters;
         foreach ($filters as &$filter) {
             $filter = Arr::only((array)$filter, $keys);
-            if (count($filter) !== 3) {
+            if (count($filter) === 2 or (count($filter) === 1 and !isset($filter['value']))) {
                 throw new \RuntimeException(
                     'filter is wrong.' . "\n"
                     . 'filter muse have these keys: ' . implode(', ', $keys) .
