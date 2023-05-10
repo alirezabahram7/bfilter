@@ -469,7 +469,8 @@ class Filter extends MakeFilter
 
         $dataFoValidation = array_map(function ($items) {
             return array_map(function ($item) {
-                return [$item->field => $item->value];
+                if (isset($item->field))
+                    return [$item->field => $item->value];
             }, $items);
         }, $this->getFilters());
 
