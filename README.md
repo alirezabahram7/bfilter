@@ -135,6 +135,34 @@ public function rules()
 ```
 
 
+## If you need custom filter on relation : (For example array search in postgresql) :
+In Request
+```
+
+class MessageFilter extends Filter
+{
+    public function __construct(Request $request)
+    {
+        $this->relations = [
+            "packages" => [
+                "numbers" => function ($query, $filter) {
+                    $query->whereRaw("'{$filter->value}' {$filter->op} ANY(numbers)");
+                },
+            ],
+            "line" => [
+                "line_number" => "number",
+            ],
+        ];
+
+        //$this->sumField = null;
+        $this->validWiths = ["packages"];
+
+        parent::__construct($request);
+    }
+}
+
+```
+
 
 ## Query String Samples:
 

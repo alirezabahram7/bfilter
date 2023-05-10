@@ -1,5 +1,5 @@
 {
-    "name": "behamin/bfilters",
+    "name": "bahram/bfilters",
     "description": "A package for customized filtering on eloquent models",
     "type": "library",
     "license": "MIT",
@@ -13,7 +13,11 @@
             "email": "abi.hossein@gmail.com"
         },
         {
-            "name": "Omid Alizadeh",
+            "name": "Amir Hossein Sobhani",
+            "email": "devil.infamous@gmail.com"
+        },
+        {
+             "name": "Omid Alizadeh",
             "email": "om.alizadeh1@gmail.com"
         }
     ],
