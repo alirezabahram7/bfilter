@@ -68,6 +68,18 @@ class UserFilter extends Filter
             ],
         ];
         
+        $this->jsonFields = [
+        
+            //Add the actual name of the json column
+            'jsonColumn1' => [ 
+                'searchName1' => 'Original field Name 1 in JsonColumn1',
+                'searchName2' => 'Original field Name 2 in JsonColumn1',
+ 
+                //if searchName and original column name is the same :
+                'Original field Name 3 in JsonColumn3'
+            ],
+        ];
+        
         // set this variabe if you want to have sum of your entries based on a specific column (f.e 'amount')
         $this->sumField = 'amount';
         
@@ -163,7 +175,34 @@ class MessageFilter extends Filter
 
 ```
 
+## Json Search:
 
+Assume you have a json column named address like this :
+```
+{
+"city" : "tehran",
+"Street" : "jordan"
+}
+```
+So you Can simply add Your Json Column(s) to your filter class, like this: 
+```
+class UserFilter extends Filter
+{
+    public function __construct(Request $request)
+    {
+      $this->jsonFields = [
+            "address" => ["city_name" => "city",
+                            "street_name" => "street
+                            ]
+        ];
+
+        parent::__construct($request);
+    }
+}
+```
+Then you can apply filters on your Model as simple as this :
+
+`filter:{"filters":[[{"field":"city_name","op":"=","value":"tehran"}],[{"field":"street_name","op":"=","value":"jordan"}]]}`
 ## Query String Samples:
 
 ### pagination: per_page=10 :
@@ -180,7 +219,7 @@ class MessageFilter extends Filter
 ?filer={
         "page":{"limit":20,"offset":0},
         "sort":[{"field":"id","dir":"desc"}],
-        "filters":
+        "filters":[
                     [
                         {"field": "first_name", "op": "like", "value":  "alireza"},
                         {"field": "last_name", "op": "=", "value":  "bahram"}
@@ -188,6 +227,8 @@ class MessageFilter extends Filter
                     [
                         {"field": "email", "op": "=", "value":  "09196649497"},
                     ],
+                   ]
+        }
                     
 ```
 ### you can use `magic filters` as well:
