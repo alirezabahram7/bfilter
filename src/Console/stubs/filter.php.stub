@@ -10,7 +10,12 @@ class {{ class }} extends Filter
     public function __construct(Request $request)
     {
         parent::__construct($request);
+
+        //Add model relations you want to search through their columns.
         $this->relations = [];
+
+        // Add model json columns and their parameters to search through.
+        $this->jsonFields = [];
 
         //$this->sumField = null;
     }

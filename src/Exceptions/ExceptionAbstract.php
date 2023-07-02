@@ -60,7 +60,7 @@ abstract class ExceptionAbstract extends \Exception
     /**
      * Get error array.
      *
-     * @return int
+     * @return int|null
      */
     public function getErrorCode(): ?int
     {
