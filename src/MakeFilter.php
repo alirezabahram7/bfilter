@@ -295,7 +295,7 @@ class MakeFilter implements Jsonable
      * @return string
      * @throws \JsonException
      */
-    public function toJson(int $options = 0): string
+    public function toJson($options = 0): string
     {
         $options |= JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
         $data = [];
