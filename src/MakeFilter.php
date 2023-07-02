@@ -5,6 +5,7 @@ namespace BFilters;
 
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Support\Arr;
+use JetBrains\PhpStorm\ArrayShape;
 
 class MakeFilter implements Jsonable
 {
@@ -172,6 +173,7 @@ class MakeFilter implements Jsonable
     /**
      * @return array
      */
+    #[ArrayShape(['limit' => "int|null", 'offset' => "int|null"])]
     public function getPage(): array
     {
         return [
@@ -293,7 +295,7 @@ class MakeFilter implements Jsonable
      * @return string
      * @throws \JsonException
      */
-    public function toJson($options = 0): string
+    public function toJson(int $options = 0): string
     {
         $options |= JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
         $data = [];
