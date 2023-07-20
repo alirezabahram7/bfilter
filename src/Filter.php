@@ -342,7 +342,10 @@ class Filter extends MakeFilter
 
     public function filterJson($entries, $filter, $jsonFiled, $isWhere): Builder
     {
-        $rawQuery = "JSON_EXTRACT(" . $jsonFiled . ", '$." . $filter->field . "')  " .$filter->op." '". $filter->value."'";
+        $rawQuery = "JSON_EXTRACT(" . $jsonFiled . ", '$." . $filter->field . "')  " .$filter->op;
+        $value = $filter->op =="in" ? " (". implode(",", json_decode($filter->value)).")" : " '". $filter->value."'";
+        $rawQuery = $rawQuery.$value;
+
         if (!$isWhere) {
             return $entries->orWhereRaw($rawQuery);
         }
