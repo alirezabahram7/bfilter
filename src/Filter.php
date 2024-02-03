@@ -340,16 +340,23 @@ class Filter extends MakeFilter
         );
     }
 
-    public function filterJson($entries, $filter, $jsonFiled, $isWhere): Builder
+    public function filterJson($entries, $filter, $jsonField, $isWhere): Builder
     {
-        $rawQuery = "JSON_EXTRACT(" . $jsonFiled . ", '$." . $filter->field . "')  " .$filter->op;
-        $value = $filter->op =="in" ? " (". implode(",", json_decode($filter->value)).")" : " '". $filter->value."'";
-        $rawQuery = $rawQuery.$value;
+        $value = $filter->value;
 
-        if (!$isWhere) {
-            return $entries->orWhereRaw($rawQuery);
+        if ($filter->op == '!=' or $filter->op == 'not in'){
+            if ($isWhere) {
+                return $entries->whereJsonDoesntContain($jsonField, [$filter->field => $value]);
+            } else {
+                return $entries->orwhereJsonDoesntContain($jsonField, [$filter->field => $value]);
+            }
         }
-        return $entries->whereRaw($rawQuery);
+
+        if ($isWhere) {
+            return $entries->whereJsonContains($jsonField, [$filter->field => $value]);
+        } else {
+            return $entries->orWhereJsonContains($jsonField, [$filter->field => $value]);
+        }
     }
     /**
      * @param $query
