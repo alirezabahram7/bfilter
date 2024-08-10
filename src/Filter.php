@@ -36,7 +36,6 @@ class Filter extends MakeFilter
      */
     public function getParamFilters(): void
     {
-
         $requestData = \json_decode(
             $this->request->get('filter', '[]'),
             true,
@@ -71,8 +70,9 @@ class Filter extends MakeFilter
 
         $dataFoValidation = array_map(function ($items) {
             return array_map(function ($item) {
-                if (isset($item->field))
+                if (isset($item->field)) {
                     return [$item->field => $item->value];
+                }
             }, $items);
         }, $this->getFilters());
 
@@ -288,6 +288,7 @@ class Filter extends MakeFilter
         return $jsonProperties[$filter->field] ??
             array_search($filter->field, $jsonProperties, true);
     }
+
     /**
      * @param $item 'filterObject'
      * @param $keyName
@@ -323,8 +324,7 @@ class Filter extends MakeFilter
         $filter,
         $relation,
         $isWhere
-    ): Builder
-    {
+    ): Builder {
         $callFunction = function ($query) use ($filter) {
             is_callable($filter->field) ? ($filter->field)($query, $filter) : $this->where($query, $filter);
         };
@@ -342,22 +342,10 @@ class Filter extends MakeFilter
 
     public function filterJson($entries, $filter, $jsonField, $isWhere): Builder
     {
-        $value = $filter->value;
-
-        if ($filter->op == '!=' or $filter->op == 'not in'){
-            if ($isWhere) {
-                return $entries->whereJsonDoesntContain($jsonField, [$filter->field => $value]);
-            } else {
-                return $entries->orwhereJsonDoesntContain($jsonField, [$filter->field => $value]);
-            }
-        }
-
-        if ($isWhere) {
-            return $entries->whereJsonContains($jsonField, [$filter->field => $value]);
-        } else {
-            return $entries->orWhereJsonContains($jsonField, [$filter->field => $value]);
-        }
+        $filter->field = $jsonField . '->' . $filter->field;
+        return $isWhere ? $this->where($entries, $filter) : $this->orWhere($entries, $filter);
     }
+    
     /**
      * @param $query
      * @param $item
