@@ -85,8 +85,8 @@ class MakeFilter implements Jsonable
             $filter = Arr::only((array)$filter, $keys);
             if (count($filter) === 2 or (count($filter) === 1 and !isset($filter['value']))) {
                 throw new \RuntimeException(
-                    'filter is wrong.' . "\n"
-                    . 'filter muse have these keys: ' . implode(', ', $keys) .
+                    'filter format is wrong.' . "\n"
+                    . 'filter must have these keys: ' . implode(', ', $keys) .
                     ".\n\r while " . print_r($constFilters, true)
                 );
             }
@@ -136,7 +136,7 @@ class MakeFilter implements Jsonable
         $sortData = Arr::only($sortData, ['field', 'dir']);
         if (count($sortData) !== 2) {
             throw new \RuntimeException(
-                'order data wrong.' . "\n" . print_r($constSortData, true)
+                'order format is wrong.' . "\n" . print_r($constSortData, true),
             );
         }
 
