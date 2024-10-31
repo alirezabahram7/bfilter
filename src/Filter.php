@@ -16,11 +16,12 @@ class Filter extends MakeFilter
     protected array $jsonFields = [];
     protected ?string $sumField = null;
     protected array $validWiths = [];
+    protected bool $needToBePaginated = false;
 
     /**
      * PostFilter constructor.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @throws \JsonException
      * @throws ValidationException
      */
@@ -49,7 +50,12 @@ class Filter extends MakeFilter
         }
 
         $page = Arr::get($requestData, 'page', []);
-        if (!empty($page)) {
+        if (empty($page) and $this->needToBePaginated) {
+            $this->setPage([
+                'limit' => $this->limit ?? 15,
+                'offset' => $this->offset ?? 0,
+            ]);
+        } elseif (!empty($page)) {
             $this->setPage($page);
         }
 
@@ -127,7 +133,8 @@ class Filter extends MakeFilter
         }
 
         $this->builder = $builder;
-        return array($entries, $count, $sum);
+
+        return [$entries, $count, $sum];
     }
 
     /**
@@ -139,7 +146,7 @@ class Filter extends MakeFilter
     }
 
     /**
-     * @param Builder $entries
+     * @param  Builder  $entries
      *
      * @return Builder
      */
@@ -182,19 +189,20 @@ class Filter extends MakeFilter
     }
 
     /**
-     * @param object $filter
+     * @param  object  $filter
      *
      * @return object $filter
      */
     private function prepareFilter(object $filter): object
     {
         if ($filter->op === 'like' or $filter->op === 'not like') {
-            $filter->value = '%' . $filter->value . '%';
+            $filter->value = '%'.$filter->value.'%';
         }
 
         if ($filter->op === 'is') {
             $filter->op = '=';
         }
+
         return $filter;
     }
 
@@ -207,7 +215,7 @@ class Filter extends MakeFilter
      *
      * @param $query
      * @param $item
-     * @param bool $isWhere
+     * @param  bool  $isWhere
      *
      * @return mixed
      */
@@ -222,9 +230,11 @@ class Filter extends MakeFilter
             ) {
                 $item = $this->setRelationKey($item, $relationKey);
                 $query = $this->filterRelation($query, $item, $relationName, $isWhere);
+
                 return true;
             }
         }
+
         return false;
     }
 
@@ -239,9 +249,11 @@ class Filter extends MakeFilter
             ) {
                 $item = $this->setJsonKey($item, $jsonKey);
                 $query = $this->filterJson($query, $item, $fieldName, $isWhere);
+
                 return true;
             }
         }
+
         return false;
     }
 
@@ -290,7 +302,7 @@ class Filter extends MakeFilter
     }
 
     /**
-     * @param $item 'filterObject'
+     * @param $item  'filterObject'
      * @param $keyName
      *
      * @return object $filter
@@ -300,6 +312,7 @@ class Filter extends MakeFilter
         if (!empty($keyName) && (is_string($keyName) || is_callable($keyName))) {
             $item->field = $keyName;
         }
+
         return $item;
     }
 
@@ -308,6 +321,7 @@ class Filter extends MakeFilter
         if (!empty($keyName) && (is_string($keyName) || is_callable($keyName))) {
             $item->field = $keyName;
         }
+
         return $item;
     }
 
@@ -334,6 +348,7 @@ class Filter extends MakeFilter
                 $callFunction
             );
         }
+
         return $entries->whereHas(
             $relation,
             $callFunction
@@ -342,10 +357,11 @@ class Filter extends MakeFilter
 
     public function filterJson($entries, $filter, $jsonField, $isWhere): Builder
     {
-        $filter->field = $jsonField . '->' . $filter->field;
+        $filter->field = $jsonField.'->'.$filter->field;
+
         return $isWhere ? $this->where($entries, $filter) : $this->orWhere($entries, $filter);
     }
-    
+
     /**
      * @param $query
      * @param $item
@@ -386,8 +402,8 @@ class Filter extends MakeFilter
     /**
      * @param $query
      * @param $columns
-     * @param string $boolean
-     * @param false $not
+     * @param  string  $boolean
+     * @param  false  $not
      *
      * @return mixed
      */
@@ -417,9 +433,9 @@ class Filter extends MakeFilter
     }
 
     /**
-     * @param Builder $query
+     * @param  Builder  $query
      * @param $item
-     * @param string $boolean
+     * @param  string  $boolean
      * @return Builder
      */
     public function whereIn(Builder $query, $item, string $boolean = 'and'): Builder
@@ -428,9 +444,9 @@ class Filter extends MakeFilter
     }
 
     /**
-     * @param Builder $query
+     * @param  Builder  $query
      * @param $item
-     * @param string $boolean
+     * @param  string  $boolean
      * @return Builder
      */
     public function whereNotIn(Builder $query, $item, string $boolean = 'and'): Builder
@@ -485,6 +501,7 @@ class Filter extends MakeFilter
             $dir = $sortDatum->dir;
             $entries = $entries->orderBy($field, $dir);
         }
+
         return $entries;
     }
 
@@ -513,17 +530,19 @@ class Filter extends MakeFilter
                 }
             }
         }
+
         return $entries;
     }
 
     public function toSql(): string
     {
         if (!$this->builder instanceof Builder) {
-            throw new \RuntimeException("builder not created.");
+            throw new \RuntimeException("builder is not created.");
         }
 
         $bindings = $this->builder->getBindings();
         $sql = str_replace('?', '%s', $this->builder->toSql());
+
         return vsprintf($sql, $bindings);
     }
 }
