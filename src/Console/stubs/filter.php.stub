@@ -18,5 +18,14 @@ class {{ class }} extends Filter
         $this->jsonFields = [];
 
         //$this->sumField = null;
+
+        //If you need to paginate the result by default, you can easily set this field.
+        //$this->needToBePaginated = true;
+
+        //set these two variables, if you want to have a default pagination,
+        //otherwise, default pagination (offset = 0) and (limit = 15) will be set.
+        //$this->offset = 0;
+        //$this->limit = 15;
+
     }
 }
